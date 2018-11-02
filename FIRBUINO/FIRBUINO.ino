@@ -20,6 +20,7 @@
 #include <Gamebuino-Meta.h>
 // #include <Gamebuino.h>
 // #include <EEPROM.h>
+#include "graphics.h"
 
 #define LCDHEIGHT gb.display.height()
 #define LCDWIDTH gb.display.width()
@@ -73,12 +74,11 @@ uint8_t gameState;
 Survivor *survivors[10]; //max. 10 survivors at the same time
 bool occupiedWindows[3];
 
-const uint8_t survivorNumberOfSteps = 20;
-
 // Graphics (declared in graphics.ino)
+// const Image backgroundBitmapMeta = Image(backgroundBitmapMetaData);
 extern const uint8_t titleScreenBitmap[] PROGMEM;
-extern const uint8_t subBackgroundBitmap[][530] PROGMEM;
-extern const uint8_t backgroundBitmap[][530] PROGMEM;
+// extern const uint8_t subBackgroundBitmap[][530] PROGMEM;
+// extern const uint8_t backgroundBitmap[][530] PROGMEM;
 extern const uint8_t livesBitmap[][8] PROGMEM;
 extern const uint8_t livesLightBitmap[][8] PROGMEM;
 extern const uint8_t livesPositions[][3][2];
@@ -174,99 +174,102 @@ void menuScreen() {
 }
 
 void drawBackground() {
+  /// TODO: work on classic mode!
+  gb.display.drawImage(0,0,backgroundBitmapMeta);
+  gb.display.fill(ORANGE);
   //Draw gray background
-  gb.display.setColor(GRAY, WHITE);
-  gb.display.drawBitmap(0, 0, subBackgroundBitmap[isClassic]);
-
-  //Draw black background
-  gb.display.setColor(BLACK, WHITE);
-  gb.display.drawBitmap(0, 0, backgroundBitmap[isClassic]);
+  // gb.display.setColor(GRAY, WHITE);
+  // gb.display.drawBitmap(0, 0, subBackgroundBitmap[isClassic]);
+  //
+  // //Draw black background
+  // gb.display.setColor(BLACK, WHITE);
+  // gb.display.drawBitmap(0, 0, backgroundBitmap[isClassic]);
 }
 
 void drawScore() {
-  // if (!isClassic) {
-  //   gb.display.fontSize = 2;
-  //   gb.display.setColor(WHITE, BLACK);
-  //
-  //   if (score <= 9) {
-  //     gb.display.cursorX = 76;
-  //   } else if (score <= 99) {
-  //     gb.display.cursorX = 68;
-  //   } else if (score <= 999) {
-  //     gb.display.cursorX = 60;
-  //   } else {
-  //     gb.display.cursorX = 52;
-  //   }
-  //
-  //   gb.display.cursorY = 2;
-  //   gb.display.print(score);
-  //
-  //   gb.display.fontSize = 1;
-  //   gb.display.setColor(BLACK, WHITE);
-  // } else {
-  //   gb.display.fontSize = 1;
-  //   gb.display.setColor(BLACK, WHITE);
-  //
-  //   if (score <= 9) {
-  //     gb.display.cursorX = 53;
-  //   } else if (score <= 99) {
-  //     gb.display.cursorX = 49;
-  //   } else if (score <= 999) {
-  //     gb.display.cursorX = 45;
-  //   } else if (score <= 9999) {
-  //     gb.display.cursorX = 41;
-  //   } else if (score <= 99999) {
-  //     gb.display.cursorX = 37;
-  //   } else if (score <= 999999) {
-  //     gb.display.cursorX = 33;
-  //   } else if (score <= 9999999) {
-  //     gb.display.cursorX = 29;
-  //   } else {
-  //     gb.display.cursorX = 25;
-  //   }
-  //   gb.display.cursorY = 1;
-  //   gb.display.print(score);
-  // }
+  if (!isClassic) {
+    gb.display.fontSize = 2;
+    gb.display.setColor(WHITE, BLACK);
+
+    if (score <= 9) {
+      gb.display.cursorX = 72;
+    } else if (score <= 99) {
+      gb.display.cursorX = 64;
+    } else if (score <= 999) {
+      gb.display.cursorX = 56;
+    } else {
+      gb.display.cursorX = 48;
+    }
+
+    gb.display.cursorY = 2;
+    gb.display.print(score);
+
+    gb.display.fontSize = 1;
+    gb.display.setColor(BLACK, WHITE);
+  } else {
+    gb.display.fontSize = 1;
+    gb.display.setColor(BLACK, WHITE);
+
+    if (score <= 9) {
+      gb.display.cursorX = 49;
+    } else if (score <= 99) {
+      gb.display.cursorX = 45;
+    } else if (score <= 999) {
+      gb.display.cursorX = 41;
+    } else if (score <= 9999) {
+      gb.display.cursorX = 37;
+    } else if (score <= 99999) {
+      gb.display.cursorX = 33;
+    } else if (score <= 999999) {
+      gb.display.cursorX = 29;
+    } else if (score <= 9999999) {
+      gb.display.cursorX = 25;
+    } else {
+      gb.display.cursorX = 25;
+    }
+    gb.display.cursorY = 1;
+    gb.display.print(score);
+  }
 }
 
 void drawLives() {
-  gb.display.setColor(WHITE);
-  switch (lives) {
-    case 3: gb.display.drawBitmap(livesPositions[isClassic][2][0],
-                                    livesPositions[isClassic][2][1],
-                                    livesLightBitmap[isClassic]);
-    case 2: gb.display.drawBitmap(livesPositions[isClassic][1][0],
-                                    livesPositions[isClassic][1][1],
-                                    livesLightBitmap[isClassic]);
-    case 1: gb.display.drawBitmap(livesPositions[isClassic][0][0],
-                                    livesPositions[isClassic][0][1],
-                                    livesLightBitmap[isClassic]);
-  }
-
-  gb.display.setColor(BLACK);
-  switch (lives) {
-    case 3: gb.display.drawBitmap(livesPositions[isClassic][2][0],
-                                    livesPositions[isClassic][2][1],
-                                    livesBitmap[isClassic]);
-    case 2: gb.display.drawBitmap(livesPositions[isClassic][1][0],
-                                    livesPositions[isClassic][1][1],
-                                    livesBitmap[isClassic]);
-    case 1: gb.display.drawBitmap(livesPositions[isClassic][0][0],
-                                    livesPositions[isClassic][0][1],
-                                    livesBitmap[isClassic]);
-  }
+  // gb.display.setColor(RED);
+  // switch (lives) {
+  //   case 3: gb.display.drawBitmap(livesPositions[isClassic][2][0],
+  //                                   livesPositions[isClassic][2][1],
+  //                                   livesLightBitmap[isClassic]);
+  //   case 2: gb.display.drawBitmap(livesPositions[isClassic][1][0],
+  //                                   livesPositions[isClassic][1][1],
+  //                                   livesLightBitmap[isClassic]);
+  //   case 1: gb.display.drawBitmap(livesPositions[isClassic][0][0],
+  //                                   livesPositions[isClassic][0][1],
+  //                                   livesLightBitmap[isClassic]);
+  // }
+  //
+  // gb.display.setColor(WHITE);
+  // switch (lives) {
+  //   case 3: gb.display.drawBitmap(livesPositions[isClassic][2][0],
+  //                                   livesPositions[isClassic][2][1],
+  //                                   livesBitmap[isClassic]);
+  //   case 2: gb.display.drawBitmap(livesPositions[isClassic][1][0],
+  //                                   livesPositions[isClassic][1][1],
+  //                                   livesBitmap[isClassic]);
+  //   case 1: gb.display.drawBitmap(livesPositions[isClassic][0][0],
+  //                                   livesPositions[isClassic][0][1],
+  //                                   livesBitmap[isClassic]);
+  // }
 }
 
 void drawAmbulance() {
-  uint8_t posX = ambulancePositions[isClassic][0];
-  uint8_t posY = ambulancePositions[isClassic][1];
-
-  gb.display.setColor(WHITE);
-  gb.display.drawBitmap(posX, posY, ambulanceLightBitmap[isClassic]);
-  gb.display.setColor(GRAY);
-  gb.display.drawBitmap(posX, posY, ambulanceShadowBitmap[isClassic]);
-  gb.display.setColor(BLACK, WHITE);
-  gb.display.drawBitmap(posX, posY, ambulanceBitmap[isClassic]);
+  // uint8_t posX = ambulancePositions[isClassic][0];
+  // uint8_t posY = ambulancePositions[isClassic][1];
+  //
+  // gb.display.setColor(WHITE);
+  // gb.display.drawBitmap(posX, posY, ambulanceLightBitmap[isClassic]);
+  // gb.display.setColor(GRAY);
+  // gb.display.drawBitmap(posX, posY, ambulanceShadowBitmap[isClassic]);
+  // gb.display.setColor(WHITE, RED);
+  // gb.display.drawBitmap(posX, posY, ambulanceBitmap[isClassic]);
 }
 
 void movePlayer() {
@@ -467,40 +470,65 @@ void drawSurvivors() {
           posY = survivorKOPositions[isClassic][0][1];
         }
 
-        gb.display.drawBitmap(posX, posY, survivor3Bitmap[isClassic]);
+          /// DEBUG STUFF:
+        gb.display.setColor(WHITE);
+        gb.display.fillRect(posX, posY, 5, 5);
+        // gb.display.drawBitmap(posX, posY, survivor3Bitmap[isClassic]);
       } else {
         if (survivors[i]->_delay > 0) {
           posX = survivorIdlePositions[isClassic][0];
           posY = survivorIdlePositions[isClassic][1];
           mult = survivorIdlePositions[isClassic][2];
-
-          gb.display.drawBitmap(posX, posY + (survivors[i]->_floor * mult), survivor0Bitmap[isClassic]);
+          gb.display.setColor(GREEN); /// DEBUG
+          gb.display.fillRect(posX, posY, 5, 5);
+          // gb.display.drawBitmap(posX, posY + (survivors[i]->_floor * mult), survivor0Bitmap[isClassic]);
         } else {
           posX = survivorPositions[isClassic][survivors[i]->_step][0];
           posY = survivorPositions[isClassic][survivors[i]->_step][1];
 
+          gb.display.setColor(GREEN); /// DEBUG
           switch (survivorPositions[isClassic][survivors[i]->_step][2]) {
-            case 0: gb.display.drawBitmap(posX, posY, survivor0Bitmap[isClassic]);
+            case 0:
+              // gb.display.drawBitmap(posX, posY, survivor0Bitmap[isClassic]);
+              gb.display.fillRect(posX, posY, 5, 5);
               break;
-            case 1: gb.display.drawBitmap(posX, posY, survivor1Bitmap[isClassic]);
+            case 1:
+              // gb.display.drawBitmap(posX, posY, survivor1Bitmap[isClassic]);
+              gb.display.fillRect(posX, posY, 5, 5);
               break;
-            case 2: gb.display.drawBitmap(posX, posY, survivor2Bitmap[isClassic]);
+            case 2:
+              // gb.display.drawBitmap(posX, posY, survivor2Bitmap[isClassic]);
+              gb.display.fillRect(posX, posY, 5, 5);
               break;
-            case 3: gb.display.drawBitmap(posX, posY, survivor3Bitmap[isClassic]);
+            case 3:
+              // gb.display.drawBitmap(posX, posY, survivor3Bitmap[isClassic]);
+              gb.display.fillRect(posX, posY, 5, 5);
               break;
-            case 4: gb.display.drawBitmap(posX, posY, survivor4Bitmap[isClassic]);
+            case 4:
+              // gb.display.drawBitmap(posX, posY, survivor4Bitmap[isClassic]);
+              gb.display.fillRect(posX, posY, 5, 5);
               break;
 
             //Flipped horizontally
-            case 5: gb.display.drawBitmap(posX, posY, survivor0Bitmap[isClassic], NOROT, FLIPH);
+            case 5:
+              // gb.display.drawBitmap(posX, posY, survivor0Bitmap[isClassic], NOROT, FLIPH);
+              gb.display.fillRect(posX, posY, 5, 5);
               break;
-            case 6: gb.display.drawBitmap(posX, posY, survivor1Bitmap[isClassic], NOROT, FLIPH);
+            case 6:
+              // gb.display.drawBitmap(posX, posY, survivor1Bitmap[isClassic], NOROT, FLIPH);
+              gb.display.fillRect(posX, posY, 5, 5);
               break;
-            case 7: gb.display.drawBitmap(posX, posY, survivor2Bitmap[isClassic], NOROT, FLIPH);
+            case 7:
+              // gb.display.drawBitmap(posX, posY, survivor2Bitmap[isClassic], NOROT, FLIPH);
+              gb.display.fillRect(posX, posY, 5, 5);
               break;
-            case 8: gb.display.drawBitmap(posX, posY, survivor3Bitmap[isClassic], NOROT, FLIPH);
+            case 8:
+              // gb.display.drawBitmap(posX, posY, survivor3Bitmap[isClassic], NOROT, FLIPH);
+              gb.display.fillRect(posX, posY, 5, 5);
               break;
-            case 9: gb.display.drawBitmap(posX, posY, survivor4Bitmap[isClassic], NOROT, FLIPH);
+            case 9:
+              // gb.display.drawBitmap(posX, posY, survivor4Bitmap[isClassic], NOROT, FLIPH);
+              gb.display.fillRect(posX, posY, 5, 5);
               break;
 
           }
@@ -513,8 +541,9 @@ void drawSurvivors() {
 void drawPlayer() {
   uint8_t posX = playerPositions[isClassic][playerPosition][0];
   uint8_t posY = playerPositions[isClassic][playerPosition][1];
-
-  gb.display.drawBitmap(posX, posY, playerBitmap[isClassic]);
+  gb.display.setColor(GREEN); /// DEBUG
+  gb.display.fillRect(posX, posY, 8, 5);
+  // gb.display.drawBitmap(posX, posY, playerBitmap[isClassic]);
 }
 
 void checkBounces() {
@@ -534,7 +563,7 @@ void drawGameOver() {
   gb.display.setColor(WHITE);
   gb.display.fillRect(24, 20, 37, 7);
   gb.display.setColor(BLACK, WHITE);
-  gb.display.cursorX = 25;
+  gb.display.cursorX = 23;
   gb.display.cursorY = 21;
   gb.display.print("GAME OVER");
 
@@ -543,15 +572,15 @@ void drawGameOver() {
     gb.display.setColor(WHITE);
     gb.display.fillRect(14, 29, 57, 7);
     gb.display.setColor(BLACK, WHITE);
-    gb.display.cursorX = 15;
+    gb.display.cursorX = 13;
     gb.display.cursorY = 30;
     gb.display.print("NEW HIGHSCORE!");
   }
 
   gb.display.setColor(WHITE);
-  gb.display.fillRect(55, LCDHEIGHT - gb.display.getFontHeight() - 1, (gb.display.getFontWidth() * 7), gb.display.getFontHeight());
+  gb.display.fillRect(51, LCDHEIGHT - gb.display.getFontHeight(), (gb.display.getFontWidth() * 7), gb.display.getFontHeight());
   gb.display.setColor(BLACK, WHITE);
-  gb.display.cursorX = 56;
+  gb.display.cursorX = 52;
   gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
   gb.display.print("\x17: Menu");
 }
@@ -640,28 +669,30 @@ void drawHighScores() {
 
 void drawPaused() {
   gb.display.setColor(WHITE);
-  gb.display.fillRect(28, 19, (gb.display.getFontWidth() * 6), gb.display.fontHeight);
+  gb.display.fillRect(28, 19, (gb.display.getFontWidth() * 6), gb.display.getFontHeight());
   gb.display.setColor(BLACK, WHITE);
   gb.display.cursorX = 29;
   gb.display.cursorY = 20;
   gb.display.print("PAUSED");
 
   gb.display.setColor(WHITE);
-  gb.display.fillRect(39, LCDHEIGHT - (gb.display.fontHeight * 2) - 1, (gb.display.getFontWidth() * 11), gb.display.getFontHeight());
+  gb.display.fillRect(39, LCDHEIGHT - (gb.display.getFontHeight() * 2) - 1, (gb.display.getFontWidth() * 11), gb.display.getFontHeight());
   gb.display.setColor(BLACK, WHITE);
   gb.display.cursorX = 40;
-  gb.display.cursorY = LCDHEIGHT - (gb.display.fontHeight * 2);
+  gb.display.cursorY = LCDHEIGHT - (gb.display.getFontHeight() * 2);
   gb.display.print("\x15: Continue");
 
   gb.display.setColor(WHITE);
-  gb.display.fillRect(55, LCDHEIGHT - gb.display.fontHeight - 1, (gb.display.getFontWidth() * 7), gb.display.fontHeight);
+  gb.display.fillRect(55, LCDHEIGHT - gb.display.getFontHeight() - 1, (gb.display.getFontWidth() * 7), gb.display.getFontHeight());
   gb.display.setColor(BLACK, WHITE);
   gb.display.cursorX = 56;
-  gb.display.cursorY = LCDHEIGHT - gb.display.fontHeight;
+  gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
   gb.display.print("\x17: Quit");
 }
 
 void drawCredits() {
+  gb.display.fill(WHITE);
+  gb.display.setColor(BLACK, WHITE);
   gb.display.cursorX = 24;
   gb.display.cursorY = 6;
   gb.display.print("Developer:");
@@ -692,6 +723,7 @@ void loop() {
 
   while (1) {
     if (gb.update()) {
+      gb.display.clear();
       if (gameState == STATE_PLAYING || gameState == STATE_PAUSED || gameState == STATE_GAMEOVER) {
         drawBackground();
 
