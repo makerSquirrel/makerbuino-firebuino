@@ -176,7 +176,7 @@ void menuScreen() {
 void drawBackground() {
   /// TODO: work on classic mode!
   gb.display.drawImage(0,0,backgroundBitmapMeta);
-  gb.display.fill(ORANGE);
+  // gb.display.fill(ORANGE);
   //Draw gray background
   // gb.display.setColor(GRAY, WHITE);
   // gb.display.drawBitmap(0, 0, subBackgroundBitmap[isClassic]);
@@ -234,30 +234,52 @@ void drawScore() {
 
 void drawLives() {
   // gb.display.setColor(RED);
-  // switch (lives) {
-  //   case 3: gb.display.drawBitmap(livesPositions[isClassic][2][0],
-  //                                   livesPositions[isClassic][2][1],
-  //                                   livesLightBitmap[isClassic]);
-  //   case 2: gb.display.drawBitmap(livesPositions[isClassic][1][0],
-  //                                   livesPositions[isClassic][1][1],
-  //                                   livesLightBitmap[isClassic]);
-  //   case 1: gb.display.drawBitmap(livesPositions[isClassic][0][0],
-  //                                   livesPositions[isClassic][0][1],
-  //                                   livesLightBitmap[isClassic]);
-  // }
-  //
-  // gb.display.setColor(WHITE);
-  // switch (lives) {
-  //   case 3: gb.display.drawBitmap(livesPositions[isClassic][2][0],
-  //                                   livesPositions[isClassic][2][1],
-  //                                   livesBitmap[isClassic]);
-  //   case 2: gb.display.drawBitmap(livesPositions[isClassic][1][0],
-  //                                   livesPositions[isClassic][1][1],
-  //                                   livesBitmap[isClassic]);
-  //   case 1: gb.display.drawBitmap(livesPositions[isClassic][0][0],
-  //                                   livesPositions[isClassic][0][1],
-  //                                   livesBitmap[isClassic]);
-  // }
+  gb.display.setColor(WHITE);
+  switch (lives) {
+    case 3: gb.display.fillRect(livesPositions[isClassic][2][0],
+                                    livesPositions[isClassic][2][1], 6, 6);
+    // gb.display.drawBitmap(livesPositions[isClassic][2][0],
+    //                                 livesPositions[isClassic][2][1],
+    //                                 livesLightBitmap[isClassic]);
+    case 2: gb.display.fillRect(livesPositions[isClassic][1][0],
+                                    livesPositions[isClassic][1][1], 6, 6);
+    // gb.display.drawBitmap(livesPositions[isClassic][1][0],
+    //                                 livesPositions[isClassic][1][1],
+    //                                 livesLightBitmap[isClassic]);
+    case 1: gb.display.fillRect(livesPositions[isClassic][0][0],
+                                    livesPositions[isClassic][0][1], 6, 6);
+    // gb.display.drawBitmap(livesPositions[isClassic][0][0],
+    //                                 livesPositions[isClassic][0][1],
+    //                                 livesLightBitmap[isClassic]);
+  }
+
+  gb.display.setColor(RED);
+  switch (lives) {
+    case 3:
+      gb.display.fillRect(livesPositions[isClassic][2][0]+1,
+                                    livesPositions[isClassic][2][1]+2, 4, 2);
+      gb.display.fillRect(livesPositions[isClassic][2][0]+2,
+                                    livesPositions[isClassic][2][1]+1, 2, 4);
+      // gb.display.drawBitmap(livesPositions[isClassic][2][0],
+      //                               livesPositions[isClassic][2][1],
+      //                               livesBitmap[isClassic]);
+    case 2:
+      gb.display.fillRect(livesPositions[isClassic][1][0]+1,
+                                    livesPositions[isClassic][1][1]+2, 4, 2);
+      gb.display.fillRect(livesPositions[isClassic][1][0]+2,
+                                    livesPositions[isClassic][1][1]+1, 2, 4);
+      // gb.display.drawBitmap(livesPositions[isClassic][1][0],
+      //                               livesPositions[isClassic][1][1],
+      //                               livesBitmap[isClassic]);
+    case 1:
+      gb.display.fillRect(livesPositions[isClassic][0][0]+1,
+                                    livesPositions[isClassic][0][1]+2, 4, 2);
+      gb.display.fillRect(livesPositions[isClassic][0][0]+2,
+                                    livesPositions[isClassic][0][1]+1, 2, 4);
+      // gb.display.drawBitmap(livesPositions[isClassic][0][0],
+      //                               livesPositions[isClassic][0][1],
+      //                               livesBitmap[isClassic]);
+  }
 }
 
 void drawAmbulance() {
@@ -479,56 +501,63 @@ void drawSurvivors() {
           posX = survivorIdlePositions[isClassic][0];
           posY = survivorIdlePositions[isClassic][1];
           mult = survivorIdlePositions[isClassic][2];
-          gb.display.setColor(GREEN); /// DEBUG
-          gb.display.fillRect(posX, posY, 5, 5);
+          // gb.display.setColor(LIGHTGREEN); /// DEBUG
+          // gb.display.fillRect(posX, posY, 5, 5);
+
+          gb.display.drawImage(posX,posY + (survivors[i]->_floor * mult),survivor0MetaArray[isClassic]);
           // gb.display.drawBitmap(posX, posY + (survivors[i]->_floor * mult), survivor0Bitmap[isClassic]);
         } else {
           posX = survivorPositions[isClassic][survivors[i]->_step][0];
           posY = survivorPositions[isClassic][survivors[i]->_step][1];
 
-          gb.display.setColor(GREEN); /// DEBUG
+          // gb.display.drawImage(posX,posX,survivor0BitmapMeta);
+          // gb.display.setColor(LIGHTGREEN); /// DEBUG
           switch (survivorPositions[isClassic][survivors[i]->_step][2]) {
             case 0:
+              gb.display.drawImage(posX,posX,survivor0MetaArray[isClassic]);
+
+
               // gb.display.drawBitmap(posX, posY, survivor0Bitmap[isClassic]);
-              gb.display.fillRect(posX, posY, 5, 5);
+              // gb.display.fillRect(posX, posY, 5, 5);
               break;
             case 1:
               // gb.display.drawBitmap(posX, posY, survivor1Bitmap[isClassic]);
-              gb.display.fillRect(posX, posY, 5, 5);
+              // gb.display.fillRect(posX, posY, 5, 5);
               break;
             case 2:
               // gb.display.drawBitmap(posX, posY, survivor2Bitmap[isClassic]);
-              gb.display.fillRect(posX, posY, 5, 5);
+              // gb.display.fillRect(posX, posY, 5, 5);
               break;
             case 3:
               // gb.display.drawBitmap(posX, posY, survivor3Bitmap[isClassic]);
-              gb.display.fillRect(posX, posY, 5, 5);
+              // gb.display.fillRect(posX, posY, 5, 5);
               break;
             case 4:
               // gb.display.drawBitmap(posX, posY, survivor4Bitmap[isClassic]);
-              gb.display.fillRect(posX, posY, 5, 5);
+              // gb.display.fillRect(posX, posY, 5, 5);
               break;
 
             //Flipped horizontally
             case 5:
+              gb.display.drawImage(posX,posX,survivor0FlipMetaArray[isClassic]);
               // gb.display.drawBitmap(posX, posY, survivor0Bitmap[isClassic], NOROT, FLIPH);
-              gb.display.fillRect(posX, posY, 5, 5);
+              // gb.display.fillRect(posX, posY, 5, 5);
               break;
             case 6:
               // gb.display.drawBitmap(posX, posY, survivor1Bitmap[isClassic], NOROT, FLIPH);
-              gb.display.fillRect(posX, posY, 5, 5);
+              // gb.display.fillRect(posX, posY, 5, 5);
               break;
             case 7:
               // gb.display.drawBitmap(posX, posY, survivor2Bitmap[isClassic], NOROT, FLIPH);
-              gb.display.fillRect(posX, posY, 5, 5);
+              // gb.display.fillRect(posX, posY, 5, 5);
               break;
             case 8:
               // gb.display.drawBitmap(posX, posY, survivor3Bitmap[isClassic], NOROT, FLIPH);
-              gb.display.fillRect(posX, posY, 5, 5);
+              // gb.display.fillRect(posX, posY, 5, 5);
               break;
             case 9:
               // gb.display.drawBitmap(posX, posY, survivor4Bitmap[isClassic], NOROT, FLIPH);
-              gb.display.fillRect(posX, posY, 5, 5);
+              // gb.display.fillRect(posX, posY, 5, 5);
               break;
 
           }
@@ -541,8 +570,11 @@ void drawSurvivors() {
 void drawPlayer() {
   uint8_t posX = playerPositions[isClassic][playerPosition][0];
   uint8_t posY = playerPositions[isClassic][playerPosition][1];
-  gb.display.setColor(GREEN); /// DEBUG
-  gb.display.fillRect(posX, posY, 8, 5);
+  /// TODO: work on classic mode!
+  gb.display.drawImage(posX,posY,playerBitmapMeta);
+
+  // gb.display.setColor(LIGHTGREEN); /// DEBUG
+  // gb.display.fillRect(posX, posY, 8, 5);
   // gb.display.drawBitmap(posX, posY, playerBitmap[isClassic]);
 }
 
@@ -676,43 +708,50 @@ void drawPaused() {
   gb.display.print("PAUSED");
 
   gb.display.setColor(WHITE);
-  gb.display.fillRect(39, LCDHEIGHT - (gb.display.getFontHeight() * 2) - 1, (gb.display.getFontWidth() * 11), gb.display.getFontHeight());
+  gb.display.fillRect(36, LCDHEIGHT - (gb.display.getFontHeight() * 2) - 1, (gb.display.getFontWidth() * 11), gb.display.getFontHeight());
   gb.display.setColor(BLACK, WHITE);
-  gb.display.cursorX = 40;
+  gb.display.cursorX = 36;
   gb.display.cursorY = LCDHEIGHT - (gb.display.getFontHeight() * 2);
   gb.display.print("\x15: Continue");
 
   gb.display.setColor(WHITE);
-  gb.display.fillRect(55, LCDHEIGHT - gb.display.getFontHeight() - 1, (gb.display.getFontWidth() * 7), gb.display.getFontHeight());
+  gb.display.fillRect(51, LCDHEIGHT - gb.display.getFontHeight() - 1, (gb.display.getFontWidth() * 7), gb.display.getFontHeight());
   gb.display.setColor(BLACK, WHITE);
-  gb.display.cursorX = 56;
+  gb.display.cursorX = 52;
   gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
   gb.display.print("\x17: Quit");
 }
 
 void drawCredits() {
-  gb.display.fill(WHITE);
-  gb.display.setColor(BLACK, WHITE);
-  gb.display.cursorX = 24;
-  gb.display.cursorY = 6;
+  gb.display.fill(BLACK);
+  gb.display.setColor(WHITE, BLACK);
+  gb.display.cursorX = 22;
+  gb.display.cursorY = 3;
   gb.display.print("Developer:");
-  gb.display.cursorX = 28;
-  gb.display.cursorY = 14;
+  gb.display.cursorX = 26;
+  gb.display.cursorY = 11;
   gb.display.print("LADBSoft");
-  gb.display.cursorX = 2;
-  gb.display.cursorY = 26;
-  gb.display.print("Awesome new graphics:");
-  gb.display.cursorX = 34;
-  gb.display.cursorY = 34;
+  gb.display.cursorX = 16;
+  gb.display.cursorY = 21;
+  gb.display.print("New graphics:");
+  gb.display.cursorX = 32;
+  gb.display.cursorY = 29;
   gb.display.print("erico");
+  gb.display.cursorX = 10;
+  gb.display.cursorY = 39;
+  gb.display.print("META/Color port:");
+  gb.display.cursorX = 16;
+  gb.display.cursorY = 47;
+  gb.display.print("makerSquirrel");
 
-  gb.display.cursorX = 56;
+  gb.display.cursorX = 52;
   gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
   gb.display.print("\x17: Back");
 }
 
 void setup() {
   gb.begin();
+  gb.display.init(80, 64, ColorMode::index);
   titleScreen();
   initGame();
   loadHighscores();
