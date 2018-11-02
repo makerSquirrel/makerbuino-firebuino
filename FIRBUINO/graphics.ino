@@ -1,4 +1,4 @@
-const byte titleScreenBitmap[] PROGMEM =
+const uint8_t titleScreenBitmap[] PROGMEM =
   {64,30,B11100000,B00000000,B00000000,B00000111,B10001110,B01111000,B11100000,B01100000,
          B11100000,B00000000,B00000000,B00001111,B11101100,B00001101,B11111001,B11110000,
          B11100000,B00000000,B00000000,B00011111,B11111000,B00001111,B00011111,B10011000,
@@ -31,7 +31,7 @@ const byte titleScreenBitmap[] PROGMEM =
          B11100000,B00000000,B00000000,B00000000,B00000000,B00000000,B00000000,B00000000,
   };
 
-const byte subBackgroundBitmap[][530] PROGMEM = {
+const uint8_t subBackgroundBitmap[][530] PROGMEM = {
   //New graphics
   {88,48,B00000000,B00000000,B00000000,B00000000,B00000000,B00000000,B10111111,B11111111,B11111111,B11111111,B11110000,
          B00000000,B00000000,B00000000,B00000000,B00000111,B10000101,B01111111,B11111111,B11111111,B11111111,B11110000,
@@ -134,7 +134,7 @@ const byte subBackgroundBitmap[][530] PROGMEM = {
   },
 };
 
-const byte backgroundBitmap[][530] PROGMEM = {
+const uint8_t backgroundBitmap[][530] PROGMEM = {
   //New graphics
   {88,48,B10101010,B10101010,B10110000,B00000000,B00000000,B00000000,B00000010,B10111111,B11111111,B11111111,B11110000,
          B10101110,B11111011,B11110000,B00000000,B00000000,B00000000,B00000101,B01111111,B11111111,B11111111,B11110000,
@@ -237,7 +237,7 @@ const byte backgroundBitmap[][530] PROGMEM = {
   },
 };
 
-const byte ambulanceBitmap[][50] PROGMEM = {
+const uint8_t ambulanceBitmap[][50] PROGMEM = {
   //New graphics
   {24,15,B00011111,B11111101,B00000000,
          B00111111,B10100101,B00000000,
@@ -276,7 +276,7 @@ const byte ambulanceBitmap[][50] PROGMEM = {
   },
 };
 
-const byte ambulanceShadowBitmap[][50] PROGMEM = {
+const uint8_t ambulanceShadowBitmap[][50] PROGMEM = {
   //New graphics
   {24,16,B00000000,B00000000,B00000000,
          B00111111,B11111101,B10000000,
@@ -315,7 +315,7 @@ const byte ambulanceShadowBitmap[][50] PROGMEM = {
   },
 };
 
-const byte ambulanceLightBitmap[][50] PROGMEM = {
+const uint8_t ambulanceLightBitmap[][50] PROGMEM = {
   //New graphics
   {24,16,B00000000,B00000000,B00000000,
          B00000000,B00000000,B00000000,
@@ -354,14 +354,14 @@ const byte ambulanceLightBitmap[][50] PROGMEM = {
   },
 };
 
-const byte ambulancePositions[][2] = {
+const uint8_t ambulancePositions[][2] = {
   //New graphics
   {66,30,},
   //Classic graphics
   {67,28,},
 };
 
-const byte livesBitmap[][8] PROGMEM = {
+const uint8_t livesBitmap[][8] PROGMEM = {
   //New graphics
   {8,6, B11111100,
         B11001100,
@@ -380,7 +380,7 @@ const byte livesBitmap[][8] PROGMEM = {
   },
 };
 
-const byte livesLightBitmap[][8] PROGMEM = {
+const uint8_t livesLightBitmap[][8] PROGMEM = {
   //New graphics
   {8,6,B00000000,
        B00110000,
@@ -399,7 +399,7 @@ const byte livesLightBitmap[][8] PROGMEM = {
   },
 };
 
-const byte livesPositions[][3][2] {
+const uint8_t livesPositions[][3][2] {
   //New graphics
   {
     {66,17},
@@ -414,7 +414,7 @@ const byte livesPositions[][3][2] {
   },
 };
 
-const byte playerBitmap[][20] PROGMEM = {
+const uint8_t playerBitmap[][20] PROGMEM = {
   //New graphics
   {16,8,B01100000,B00000110,
         B01011000,B00011010,
@@ -439,7 +439,7 @@ const byte playerBitmap[][20] PROGMEM = {
   },
 };
 
-const byte playerPositions[][3][2] = {
+const uint8_t playerPositions[][3][2] = {
   //New graphics
   {
     {7,37},
@@ -454,7 +454,7 @@ const byte playerPositions[][3][2] = {
   },
 };
 
-const byte survivor0Bitmap[][11] PROGMEM = {
+const uint8_t survivor0Bitmap[][11] PROGMEM = {
   //New graphics
   {8,8,B01100000,
        B01011000,
@@ -479,7 +479,7 @@ const byte survivor0Bitmap[][11] PROGMEM = {
   },
 };
 
-const byte survivor1Bitmap[][10] PROGMEM = {
+const uint8_t survivor1Bitmap[][10] PROGMEM = {
   //New graphics
   {8,8,B00111000,
        B01101100,
@@ -502,7 +502,7 @@ const byte survivor1Bitmap[][10] PROGMEM = {
   },
 };
 
-const byte survivor2Bitmap[][10] PROGMEM = {
+const uint8_t survivor2Bitmap[][10] PROGMEM = {
   //New graphics
   {8,8,B01110000,
        B11011000,
@@ -525,7 +525,7 @@ const byte survivor2Bitmap[][10] PROGMEM = {
   },
 };
 
-const byte survivor3Bitmap[][7] PROGMEM = {
+const uint8_t survivor3Bitmap[][7] PROGMEM = {
   //New graphics
   {8,5,B00000110,
        B11010110,
@@ -542,7 +542,7 @@ const byte survivor3Bitmap[][7] PROGMEM = {
   },
 };
 
-const byte survivor4Bitmap[][9] PROGMEM = {
+const uint8_t survivor4Bitmap[][9] PROGMEM = {
   //New graphics
   {8,6,B01110000,
        B11010000,
@@ -563,7 +563,7 @@ const byte survivor4Bitmap[][9] PROGMEM = {
   },
 };
 
-const byte survivorPositions[][survivorNumberOfSteps][3] = {
+const uint8_t survivorPositions[][survivorNumberOfSteps][3] = {
   //New graphics
   {
     {8,8,1},   //Free fall
@@ -612,14 +612,14 @@ const byte survivorPositions[][survivorNumberOfSteps][3] = {
   },
 };
 
-const byte survivorIdlePositions[][3] = { //X, Y, Multiplier
+const uint8_t survivorIdlePositions[][3] = { //X, Y, Multiplier
   //New graphics
   {5,4,11},
   //Classic graphics
   {0,0,12},
 };
 
-const byte survivorKOPositions[][3][2] = { //X, Y
+const uint8_t survivorKOPositions[][3][2] = { //X, Y
   //New graphics
   {
     {11,41},

@@ -17,18 +17,22 @@
          spawn! Remember, freeing memory is good :P               |
 |----------------------------------------------------------------*/
 
-#include <Gamebuino.h>
-#include <EEPROM.h>
+#include <Gamebuino-Meta.h>
+// #include <Gamebuino.h>
+// #include <EEPROM.h>
+
+#define LCDHEIGHT gb.display.height()
+#define LCDWIDTH gb.display.width()
 
 class Survivor {
   public:
-    short _floor;
-    short _step;
-    short _delay;
+    int16_t _floor;
+    int16_t _step;
+    int16_t _delay;
     bool _bounced;
     bool _dead;
 
-    Survivor(short floor, short delay) {
+    Survivor(int16_t floor, int16_t delay) {
       _floor = floor;
       if (floor == 0) {
         _step = 0;
@@ -52,63 +56,63 @@ class Survivor {
 #define HIGHSCORE_COUNT 5
 #define NAME_LETTERS 10
 
-byte survivorCount;
+uint8_t survivorCount;
 
-Gamebuino gb;
+// Gamebuino gb;
 long score;
 int highscoreScores[HIGHSCORE_COUNT];
 char highscoreNames[HIGHSCORE_COUNT][NAME_LETTERS + 1];
 long minHighscore;
-short lives;
-short playerPosition;
-short moveTick;
-short spawnDelay;
-short noOfSurvivors;
-boolean isClassic;
-byte gameState;
+int16_t lives;
+int16_t playerPosition;
+int16_t moveTick;
+int16_t spawnDelay;
+int16_t noOfSurvivors;
+bool isClassic;
+uint8_t gameState;
 Survivor *survivors[10]; //max. 10 survivors at the same time
-boolean occupiedWindows[3];
+bool occupiedWindows[3];
 
-const byte survivorNumberOfSteps = 20;
+const uint8_t survivorNumberOfSteps = 20;
 
 // Graphics (declared in graphics.ino)
-extern const byte titleScreenBitmap[] PROGMEM;
-extern const byte subBackgroundBitmap[][530] PROGMEM;
-extern const byte backgroundBitmap[][530] PROGMEM;
-extern const byte livesBitmap[][8] PROGMEM;
-extern const byte livesLightBitmap[][8] PROGMEM;
-extern const byte livesPositions[][3][2];
-extern const byte ambulanceBitmap[][50] PROGMEM;
-extern const byte ambulanceShadowBitmap[][50] PROGMEM;
-extern const byte ambulanceLightBitmap[][50] PROGMEM;
-extern const byte ambulancePositions[][2];
-extern const byte playerBitmap[][20] PROGMEM;
-extern const byte playerPositions[][3][2];
-extern const byte survivor0Bitmap[][11] PROGMEM;
-extern const byte survivor1Bitmap[][10] PROGMEM;
-extern const byte survivor2Bitmap[][10] PROGMEM;
-extern const byte survivor3Bitmap[][7] PROGMEM;
-extern const byte survivor4Bitmap[][9] PROGMEM;
-extern const byte survivorPositions[][survivorNumberOfSteps][3];
-extern const byte survivorIdlePositions[][3];
-extern const byte survivorKOPositions[][3][2];
+extern const uint8_t titleScreenBitmap[] PROGMEM;
+extern const uint8_t subBackgroundBitmap[][530] PROGMEM;
+extern const uint8_t backgroundBitmap[][530] PROGMEM;
+extern const uint8_t livesBitmap[][8] PROGMEM;
+extern const uint8_t livesLightBitmap[][8] PROGMEM;
+extern const uint8_t livesPositions[][3][2];
+extern const uint8_t ambulanceBitmap[][50] PROGMEM;
+extern const uint8_t ambulanceShadowBitmap[][50] PROGMEM;
+extern const uint8_t ambulanceLightBitmap[][50] PROGMEM;
+extern const uint8_t ambulancePositions[][2];
+extern const uint8_t playerBitmap[][20] PROGMEM;
+extern const uint8_t playerPositions[][3][2];
+extern const uint8_t survivor0Bitmap[][11] PROGMEM;
+extern const uint8_t survivor1Bitmap[][10] PROGMEM;
+extern const uint8_t survivor2Bitmap[][10] PROGMEM;
+extern const uint8_t survivor3Bitmap[][7] PROGMEM;
+extern const uint8_t survivor4Bitmap[][9] PROGMEM;
+extern const uint8_t survivorPositions[][survivorNumberOfSteps][3];
+extern const uint8_t survivorIdlePositions[][3];
+extern const uint8_t survivorKOPositions[][3][2];
 
 //Menu
-#define MENULENGTH 4
-const char strPlayNew[] PROGMEM = "Play (new)";
-const char strPlayClassic[] PROGMEM = "Play (classic)";
-const char strHighscores[] PROGMEM = "High scores";
-const char strAbout[] PROGMEM = "About";
-const char* const menu[MENULENGTH] PROGMEM = {
-  strPlayNew,
-  strPlayClassic,
-  strHighscores,
-  strAbout
+// #define MENULENGTH 4
+// const char strPlayNew[]  = "Play (new)";
+// const char strPlayClassic[]  = "Play (classic)";
+// const char strHighscores[]  = "High scores";
+// const char strAbout[]  = "About";
+const char* menu[]  = {
+  "Play (new)",
+  "Play (classic)",
+  "High scores",
+  "About"
 };
 
 void titleScreen() {
-  gb.titleScreen(F("FireBuino!"), titleScreenBitmap);
-  gb.battery.show = false;
+  // gb.titleScreen(F("FireBuino!"), titleScreenBitmap);
+  // gb.battery.show = false;
 }
 
 void initGame() {
@@ -135,20 +139,20 @@ void initGame() {
 
 //Based on code from Crabator, by Rodot
 void loadHighscores() {
-  for (byte j = 0; j < HIGHSCORE_COUNT; j++) {
-    for (byte i = 0; i < NAME_LETTERS; i++) {
-      highscoreNames[j][i] = EEPROM.read(i + j * (NAME_LETTERS + 2));
-    }
-    highscoreScores[j] = EEPROM.read(NAME_LETTERS + j * (NAME_LETTERS + 2)) & 0x00FF; //LSB
-    highscoreScores[j] += (EEPROM.read(NAME_LETTERS + 1 + j * (NAME_LETTERS + 2)) << 8) & 0xFF00; //MSB
-    highscoreScores[j] = (highscoreScores[j] == 0xFFFF) ? 0 : highscoreScores[j];
-
-    minHighscore = highscoreScores[j];
-  }
+  // for (uint8_t j = 0; j < HIGHSCORE_COUNT; j++) {
+  //   for (uint8_t i = 0; i < NAME_LETTERS; i++) {
+  //     highscoreNames[j][i] = EEPROM.read(i + j * (NAME_LETTERS + 2));
+  //   }
+  //   highscoreScores[j] = EEPROM.read(NAME_LETTERS + j * (NAME_LETTERS + 2)) & 0x00FF; //LSB
+  //   highscoreScores[j] += (EEPROM.read(NAME_LETTERS + 1 + j * (NAME_LETTERS + 2)) << 8) & 0xFF00; //MSB
+  //   highscoreScores[j] = (highscoreScores[j] == 0xFFFF) ? 0 : highscoreScores[j];
+  //
+  //   minHighscore = highscoreScores[j];
+  // }
 }
 
 void menuScreen() {
-  switch (gb.menu(menu, MENULENGTH)) {
+  switch (gb.gui.menu("FireBuino Menu", menu)) {
     case 0: //Play (new)
       isClassic = false;
       gameState = STATE_PLAYING;
@@ -180,49 +184,49 @@ void drawBackground() {
 }
 
 void drawScore() {
-  if (!isClassic) {
-    gb.display.fontSize = 2;
-    gb.display.setColor(WHITE, BLACK);
-
-    if (score <= 9) {
-      gb.display.cursorX = 76;
-    } else if (score <= 99) {
-      gb.display.cursorX = 68;
-    } else if (score <= 999) {
-      gb.display.cursorX = 60;
-    } else {
-      gb.display.cursorX = 52;
-    }
-
-    gb.display.cursorY = 2;
-    gb.display.print(score);
-
-    gb.display.fontSize = 1;
-    gb.display.setColor(BLACK, WHITE);
-  } else {
-    gb.display.fontSize = 1;
-    gb.display.setColor(BLACK, WHITE);
-
-    if (score <= 9) {
-      gb.display.cursorX = 53;
-    } else if (score <= 99) {
-      gb.display.cursorX = 49;
-    } else if (score <= 999) {
-      gb.display.cursorX = 45;
-    } else if (score <= 9999) {
-      gb.display.cursorX = 41;
-    } else if (score <= 99999) {
-      gb.display.cursorX = 37;
-    } else if (score <= 999999) {
-      gb.display.cursorX = 33;
-    } else if (score <= 9999999) {
-      gb.display.cursorX = 29;
-    } else {
-      gb.display.cursorX = 25;
-    }
-    gb.display.cursorY = 1;
-    gb.display.print(score);
-  }
+  // if (!isClassic) {
+  //   gb.display.fontSize = 2;
+  //   gb.display.setColor(WHITE, BLACK);
+  //
+  //   if (score <= 9) {
+  //     gb.display.cursorX = 76;
+  //   } else if (score <= 99) {
+  //     gb.display.cursorX = 68;
+  //   } else if (score <= 999) {
+  //     gb.display.cursorX = 60;
+  //   } else {
+  //     gb.display.cursorX = 52;
+  //   }
+  //
+  //   gb.display.cursorY = 2;
+  //   gb.display.print(score);
+  //
+  //   gb.display.fontSize = 1;
+  //   gb.display.setColor(BLACK, WHITE);
+  // } else {
+  //   gb.display.fontSize = 1;
+  //   gb.display.setColor(BLACK, WHITE);
+  //
+  //   if (score <= 9) {
+  //     gb.display.cursorX = 53;
+  //   } else if (score <= 99) {
+  //     gb.display.cursorX = 49;
+  //   } else if (score <= 999) {
+  //     gb.display.cursorX = 45;
+  //   } else if (score <= 9999) {
+  //     gb.display.cursorX = 41;
+  //   } else if (score <= 99999) {
+  //     gb.display.cursorX = 37;
+  //   } else if (score <= 999999) {
+  //     gb.display.cursorX = 33;
+  //   } else if (score <= 9999999) {
+  //     gb.display.cursorX = 29;
+  //   } else {
+  //     gb.display.cursorX = 25;
+  //   }
+  //   gb.display.cursorY = 1;
+  //   gb.display.print(score);
+  // }
 }
 
 void drawLives() {
@@ -254,8 +258,8 @@ void drawLives() {
 }
 
 void drawAmbulance() {
-  byte posX = ambulancePositions[isClassic][0];
-  byte posY = ambulancePositions[isClassic][1];
+  uint8_t posX = ambulancePositions[isClassic][0];
+  uint8_t posY = ambulancePositions[isClassic][1];
 
   gb.display.setColor(WHITE);
   gb.display.drawBitmap(posX, posY, ambulanceLightBitmap[isClassic]);
@@ -266,29 +270,29 @@ void drawAmbulance() {
 }
 
 void movePlayer() {
-  //Move player to the left if BTN_LEFT pressed
-  if (gb.buttons.pressed(BTN_LEFT)) {
+  //Move player to the left if BUTTON_LEFT pressed
+  if (gb.buttons.pressed(BUTTON_LEFT)) {
     if (playerPosition > 0) {
       playerPosition--;
     }
   }
 
-  //Move player to the left if BTN_A pressed
-  if (gb.buttons.pressed(BTN_A)) {
+  //Move player to the left if BUTTON_A pressed
+  if (gb.buttons.pressed(BUTTON_A)) {
     if (playerPosition > 0) {
       playerPosition--;
     }
   }
 
-  //Move player to the right if BTN_RIGHT pressed
-  if (gb.buttons.pressed(BTN_RIGHT)) {
+  //Move player to the right if BUTTON_RIGHT pressed
+  if (gb.buttons.pressed(BUTTON_RIGHT)) {
     if (playerPosition < 2) {
       playerPosition++;
     }
   }
 
-  //Move player to the right if BTN_B pressed
-  if (gb.buttons.pressed(BTN_B)) {
+  //Move player to the right if BUTTON_B pressed
+  if (gb.buttons.pressed(BUTTON_B)) {
     if (playerPosition < 2) {
       playerPosition++;
     }
@@ -296,9 +300,9 @@ void movePlayer() {
 }
 
 void spawnSurvivor() {
-  byte mustSpawn;
-  byte floorNo;
-  byte delayTicks;
+  uint8_t mustSpawn;
+  uint8_t floorNo;
+  uint8_t delayTicks;
 
   if (noOfSurvivors != 0) {
     //More probable with higher score
@@ -445,9 +449,9 @@ void moveSurvivors() {
 }
 
 void drawSurvivors() {
-  byte posX;
-  byte posY;
-  byte mult;
+  uint8_t posX;
+  uint8_t posY;
+  uint8_t mult;
 
   for (int i = 0; i < 10; i++) {
     if (survivors[i] != NULL) {
@@ -507,8 +511,8 @@ void drawSurvivors() {
 }
 
 void drawPlayer() {
-  byte posX = playerPositions[isClassic][playerPosition][0];
-  byte posY = playerPositions[isClassic][playerPosition][1];
+  uint8_t posX = playerPositions[isClassic][playerPosition][0];
+  uint8_t posY = playerPositions[isClassic][playerPosition][1];
 
   gb.display.drawBitmap(posX, posY, playerBitmap[isClassic]);
 }
@@ -545,112 +549,112 @@ void drawGameOver() {
   }
 
   gb.display.setColor(WHITE);
-  gb.display.fillRect(55, LCDHEIGHT - gb.display.fontHeight - 1, (gb.display.fontWidth * 7), gb.display.fontHeight);
+  gb.display.fillRect(55, LCDHEIGHT - gb.display.getFontHeight() - 1, (gb.display.getFontWidth() * 7), gb.display.getFontHeight());
   gb.display.setColor(BLACK, WHITE);
   gb.display.cursorX = 56;
-  gb.display.cursorY = LCDHEIGHT - gb.display.fontHeight;
+  gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
   gb.display.print("\x17: Menu");
 }
 
 //Based on code from Crabator, by Rodot
 void saveHighscore() {
-  gb.getDefaultName(highscoreNames[HIGHSCORE_COUNT - 1]);
-  gb.keyboard(highscoreNames[HIGHSCORE_COUNT - 1], NAME_LETTERS + 1);
-  highscoreScores[HIGHSCORE_COUNT - 1] = score;
-
-  //Sort highscores
-  for (byte i = HIGHSCORE_COUNT - 1; i > 0; i--) {
-    if (highscoreScores[i - 1] < highscoreScores[i]) {
-      char tempName[NAME_LETTERS];
-      strcpy(tempName, highscoreNames[i - 1]);
-      strcpy(highscoreNames[i - 1], highscoreNames[i]);
-      strcpy(highscoreNames[i], tempName);
-      unsigned int tempScore;
-      tempScore = highscoreScores[i - 1];
-      highscoreScores[i - 1] = highscoreScores[i];
-      highscoreScores[i] = tempScore;
-
-      //update minimum highscore
-      minHighscore = highscoreScores[i];
-    }
-    else {
-      break;
-    }
-  }
-
-  //Save highscores in EEPROM
-  for (byte j = 0; j < HIGHSCORE_COUNT; j++) {
-    for (byte i = 0; i < NAME_LETTERS; i++) {
-      EEPROM.write(i + j * (NAME_LETTERS + 2), highscoreNames[j][i]);
-    }
-    EEPROM.write(NAME_LETTERS + j * (NAME_LETTERS + 2), highscoreScores[j] & 0x00FF); //LSB
-    EEPROM.write(NAME_LETTERS + 1 + j * (NAME_LETTERS + 2), (highscoreScores[j] >> 8) & 0x00FF); //MSB
-  }
-  drawHighScores();
+  // gb.getDefaultName(highscoreNames[HIGHSCORE_COUNT - 1]);
+  // gb.keyboard(highscoreNames[HIGHSCORE_COUNT - 1], NAME_LETTERS + 1);
+  // highscoreScores[HIGHSCORE_COUNT - 1] = score;
+  //
+  // //Sort highscores
+  // for (uint8_t i = HIGHSCORE_COUNT - 1; i > 0; i--) {
+  //   if (highscoreScores[i - 1] < highscoreScores[i]) {
+  //     char tempName[NAME_LETTERS];
+  //     strcpy(tempName, highscoreNames[i - 1]);
+  //     strcpy(highscoreNames[i - 1], highscoreNames[i]);
+  //     strcpy(highscoreNames[i], tempName);
+  //     unsigned int tempScore;
+  //     tempScore = highscoreScores[i - 1];
+  //     highscoreScores[i - 1] = highscoreScores[i];
+  //     highscoreScores[i] = tempScore;
+  //
+  //     //update minimum highscore
+  //     minHighscore = highscoreScores[i];
+  //   }
+  //   else {
+  //     break;
+  //   }
+  // }
+  //
+  // //Save highscores in EEPROM
+  // for (uint8_t j = 0; j < HIGHSCORE_COUNT; j++) {
+  //   for (uint8_t i = 0; i < NAME_LETTERS; i++) {
+  //     EEPROM.write(i + j * (NAME_LETTERS + 2), highscoreNames[j][i]);
+  //   }
+  //   EEPROM.write(NAME_LETTERS + j * (NAME_LETTERS + 2), highscoreScores[j] & 0x00FF); //LSB
+  //   EEPROM.write(NAME_LETTERS + 1 + j * (NAME_LETTERS + 2), (highscoreScores[j] >> 8) & 0x00FF); //MSB
+  // }
+  // drawHighScores();
 }
 
 void drawHighScores() {
-  while (true) {
-    if (gb.update()) {
-      gb.display.drawRect(0, 0, LCDWIDTH, LCDHEIGHT);
-
-      //Title
-      gb.display.cursorX = 20;
-      gb.display.cursorY = 3;
-      gb.display.println(F("HIGH SCORES"));
-
-      gb.display.cursorY = gb.display.fontHeight * 2;
-      for (byte i = 0; i < HIGHSCORE_COUNT; i++) {
-        gb.display.cursorX = 6;
-
-        //Name
-        if (highscoreScores[i] == 0) {
-          gb.display.print('-');
-        } else {
-          gb.display.print(highscoreNames[i]);
-        }
-
-        //Score
-        if (highscoreScores[i] > 9999) {
-          gb.display.cursorX = LCDWIDTH - 6 - 5 * gb.display.fontWidth;
-        } else if (highscoreScores[i] > 999) {
-          gb.display.cursorX = LCDWIDTH - 6 - 4 * gb.display.fontWidth;
-        } else if (highscoreScores[i] > 99) {
-          gb.display.cursorX = LCDWIDTH - 6 - 3 * gb.display.fontWidth;
-        } else if (highscoreScores[i] > 9) {
-          gb.display.cursorX = LCDWIDTH - 6 - 2 * gb.display.fontWidth;
-        } else {
-          gb.display.cursorX = LCDWIDTH - 6 - gb.display.fontWidth;
-        }
-        gb.display.cursorY = (gb.display.fontHeight * 2) + (gb.display.fontHeight * i);
-        gb.display.println(highscoreScores[i]);
-      }
-
-      if (gb.buttons.pressed(BTN_A) || gb.buttons.pressed(BTN_B) || gb.buttons.pressed(BTN_C)) {
-        gb.sound.playOK();
-        break;
-      }
-    }
-  }
+  // while (true) {
+  //   if (gb.update()) {
+  //     gb.display.drawRect(0, 0, LCDWIDTH, LCDHEIGHT);
+  //
+  //     //Title
+  //     gb.display.cursorX = 20;
+  //     gb.display.cursorY = 3;
+  //     gb.display.println(F("HIGH SCORES"));
+  //
+  //     gb.display.cursorY = gb.display.fontHeight * 2;
+  //     for (uint8_t i = 0; i < HIGHSCORE_COUNT; i++) {
+  //       gb.display.cursorX = 6;
+  //
+  //       //Name
+  //       if (highscoreScores[i] == 0) {
+  //         gb.display.print('-');
+  //       } else {
+  //         gb.display.print(highscoreNames[i]);
+  //       }
+  //
+  //       //Score
+  //       if (highscoreScores[i] > 9999) {
+  //         gb.display.cursorX = LCDWIDTH - 6 - 5 * gb.display.fontWidth;
+  //       } else if (highscoreScores[i] > 999) {
+  //         gb.display.cursorX = LCDWIDTH - 6 - 4 * gb.display.fontWidth;
+  //       } else if (highscoreScores[i] > 99) {
+  //         gb.display.cursorX = LCDWIDTH - 6 - 3 * gb.display.fontWidth;
+  //       } else if (highscoreScores[i] > 9) {
+  //         gb.display.cursorX = LCDWIDTH - 6 - 2 * gb.display.fontWidth;
+  //       } else {
+  //         gb.display.cursorX = LCDWIDTH - 6 - gb.display.fontWidth;
+  //       }
+  //       gb.display.cursorY = (gb.display.fontHeight * 2) + (gb.display.fontHeight * i);
+  //       gb.display.println(highscoreScores[i]);
+  //     }
+  //
+  //     if (gb.buttons.pressed(BUTTON_A) || gb.buttons.pressed(BUTTON_B) || gb.buttons.pressed(BUTTON_C)) {
+  //       gb.sound.playOK();
+  //       break;
+  //     }
+  //   }
+  // }
 }
 
 void drawPaused() {
   gb.display.setColor(WHITE);
-  gb.display.fillRect(28, 19, (gb.display.fontWidth * 6), gb.display.fontHeight);
+  gb.display.fillRect(28, 19, (gb.display.getFontWidth() * 6), gb.display.fontHeight);
   gb.display.setColor(BLACK, WHITE);
   gb.display.cursorX = 29;
   gb.display.cursorY = 20;
   gb.display.print("PAUSED");
 
   gb.display.setColor(WHITE);
-  gb.display.fillRect(39, LCDHEIGHT - (gb.display.fontHeight * 2) - 1, (gb.display.fontWidth * 11), gb.display.fontHeight);
+  gb.display.fillRect(39, LCDHEIGHT - (gb.display.fontHeight * 2) - 1, (gb.display.getFontWidth() * 11), gb.display.getFontHeight());
   gb.display.setColor(BLACK, WHITE);
   gb.display.cursorX = 40;
   gb.display.cursorY = LCDHEIGHT - (gb.display.fontHeight * 2);
   gb.display.print("\x15: Continue");
 
   gb.display.setColor(WHITE);
-  gb.display.fillRect(55, LCDHEIGHT - gb.display.fontHeight - 1, (gb.display.fontWidth * 7), gb.display.fontHeight);
+  gb.display.fillRect(55, LCDHEIGHT - gb.display.fontHeight - 1, (gb.display.getFontWidth() * 7), gb.display.fontHeight);
   gb.display.setColor(BLACK, WHITE);
   gb.display.cursorX = 56;
   gb.display.cursorY = LCDHEIGHT - gb.display.fontHeight;
@@ -672,7 +676,7 @@ void drawCredits() {
   gb.display.print("erico");
 
   gb.display.cursorX = 56;
-  gb.display.cursorY = LCDHEIGHT - gb.display.fontHeight;
+  gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
   gb.display.print("\x17: Back");
 }
 
@@ -721,7 +725,7 @@ void loop() {
           drawPaused();
 
           //Unpause
-          if (gb.buttons.pressed(BTN_A)) {
+          if (gb.buttons.pressed(BUTTON_A)) {
             gameState = STATE_PLAYING;
           }
         }
@@ -735,7 +739,7 @@ void loop() {
       }
 
       //GoTo title screen if C button is pressed
-      if (gb.buttons.pressed(BTN_C)) {
+      if (gb.buttons.pressed(BUTTON_C)) {
         if (gameState == STATE_PLAYING) {
           gameState = STATE_PAUSED;
         } else if (gameState == STATE_ABOUT) {
@@ -761,4 +765,3 @@ void loop() {
     }
   }
 }
-
