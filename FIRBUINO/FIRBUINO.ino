@@ -18,8 +18,6 @@
 |----------------------------------------------------------------*/
 
 #include <Gamebuino-Meta.h>
-// #include <Gamebuino.h>
-// #include <EEPROM.h>
 #include "graphics.h"
 
 #define LCDHEIGHT gb.display.height()
@@ -59,7 +57,6 @@ class Survivor {
 
 uint8_t survivorCount;
 
-// Gamebuino gb;
 long score;
 int highscoreScores[HIGHSCORE_COUNT];
 char highscoreNames[HIGHSCORE_COUNT][NAME_LETTERS + 1];
@@ -71,38 +68,33 @@ int16_t spawnDelay;
 int16_t noOfSurvivors;
 bool isClassic;
 uint8_t gameState;
-Survivor *survivors[10]; //max. 10 survivors at the same time
+Survivor *survivors[10] = {nullptr}; //max. 10 survivors at the same time
 bool occupiedWindows[3];
 
 // Graphics (declared in graphics.ino)
 // const Image backgroundBitmapMeta = Image(backgroundBitmapMetaData);
-extern const uint8_t titleScreenBitmap[] PROGMEM;
+// extern const uint8_t titleScreenBitmap[] PROGMEM;
 // extern const uint8_t subBackgroundBitmap[][530] PROGMEM;
 // extern const uint8_t backgroundBitmap[][530] PROGMEM;
-extern const uint8_t livesBitmap[][8] PROGMEM;
-extern const uint8_t livesLightBitmap[][8] PROGMEM;
+// extern const uint8_t livesBitmap[][8] PROGMEM;
+// extern const uint8_t livesLightBitmap[][8] PROGMEM;
 extern const uint8_t livesPositions[][3][2];
-extern const uint8_t ambulanceBitmap[][50] PROGMEM;
-extern const uint8_t ambulanceShadowBitmap[][50] PROGMEM;
-extern const uint8_t ambulanceLightBitmap[][50] PROGMEM;
+// extern const uint8_t ambulanceBitmap[][50] PROGMEM;
+// extern const uint8_t ambulanceShadowBitmap[][50] PROGMEM;
+// extern const uint8_t ambulanceLightBitmap[][50] PROGMEM;
 extern const uint8_t ambulancePositions[][2];
-extern const uint8_t playerBitmap[][20] PROGMEM;
+// extern const uint8_t playerBitmap[][20] PROGMEM;
 extern const uint8_t playerPositions[][3][2];
-extern const uint8_t survivor0Bitmap[][11] PROGMEM;
-extern const uint8_t survivor1Bitmap[][10] PROGMEM;
-extern const uint8_t survivor2Bitmap[][10] PROGMEM;
-extern const uint8_t survivor3Bitmap[][7] PROGMEM;
-extern const uint8_t survivor4Bitmap[][9] PROGMEM;
+// extern const uint8_t survivor0Bitmap[][11] PROGMEM;
+// extern const uint8_t survivor1Bitmap[][10] PROGMEM;
+// extern const uint8_t survivor2Bitmap[][10] PROGMEM;
+// extern const uint8_t survivor3Bitmap[][7] PROGMEM;
+// extern const uint8_t survivor4Bitmap[][9] PROGMEM;
 extern const uint8_t survivorPositions[][survivorNumberOfSteps][3];
 extern const uint8_t survivorIdlePositions[][3];
 extern const uint8_t survivorKOPositions[][3][2];
 
 //Menu
-// #define MENULENGTH 4
-// const char strPlayNew[]  = "Play (new)";
-// const char strPlayClassic[]  = "Play (classic)";
-// const char strHighscores[]  = "High scores";
-// const char strAbout[]  = "About";
 const char* menu[]  = {
   "Play (new)",
   "Play (classic)",
@@ -110,10 +102,6 @@ const char* menu[]  = {
   "About"
 };
 
-void titleScreen() {
-  // gb.titleScreen(F("FireBuino!"), titleScreenBitmap);
-  // gb.battery.show = false;
-}
 
 void initGame() {
   gb.pickRandomSeed();
@@ -137,6 +125,7 @@ void initGame() {
   occupiedWindows[0] = true;
 }
 
+
 //Based on code from Crabator, by Rodot
 void loadHighscores() {
   // for (uint8_t j = 0; j < HIGHSCORE_COUNT; j++) {
@@ -150,6 +139,7 @@ void loadHighscores() {
   //   minHighscore = highscoreScores[j];
   // }
 }
+
 
 void menuScreen() {
   switch (gb.gui.menu("FireBuino Menu", menu)) {
@@ -168,23 +158,16 @@ void menuScreen() {
       gameState = STATE_ABOUT;
       break;
     default:
-      titleScreen();
+      gameState = STATE_MENU;
       break;
   }
 }
 
+
 void drawBackground() {
-  /// TODO: work on classic mode!
-  gb.display.drawImage(0,0,backgroundBitmapMeta);
-  // gb.display.fill(ORANGE);
-  //Draw gray background
-  // gb.display.setColor(GRAY, WHITE);
-  // gb.display.drawBitmap(0, 0, subBackgroundBitmap[isClassic]);
-  //
-  // //Draw black background
-  // gb.display.setColor(BLACK, WHITE);
-  // gb.display.drawBitmap(0, 0, backgroundBitmap[isClassic]);
+  gb.display.drawImage(0, 0,backgroundMetaArray[isClassic]);
 }
+
 
 void drawScore() {
   if (!isClassic) {
@@ -232,25 +215,16 @@ void drawScore() {
   }
 }
 
+
 void drawLives() {
-  // gb.display.setColor(RED);
   gb.display.setColor(WHITE);
   switch (lives) {
     case 3: gb.display.fillRect(livesPositions[isClassic][2][0],
                                     livesPositions[isClassic][2][1], 6, 6);
-    // gb.display.drawBitmap(livesPositions[isClassic][2][0],
-    //                                 livesPositions[isClassic][2][1],
-    //                                 livesLightBitmap[isClassic]);
     case 2: gb.display.fillRect(livesPositions[isClassic][1][0],
                                     livesPositions[isClassic][1][1], 6, 6);
-    // gb.display.drawBitmap(livesPositions[isClassic][1][0],
-    //                                 livesPositions[isClassic][1][1],
-    //                                 livesLightBitmap[isClassic]);
     case 1: gb.display.fillRect(livesPositions[isClassic][0][0],
                                     livesPositions[isClassic][0][1], 6, 6);
-    // gb.display.drawBitmap(livesPositions[isClassic][0][0],
-    //                                 livesPositions[isClassic][0][1],
-    //                                 livesLightBitmap[isClassic]);
   }
 
   gb.display.setColor(RED);
@@ -260,69 +234,43 @@ void drawLives() {
                                     livesPositions[isClassic][2][1]+2, 4, 2);
       gb.display.fillRect(livesPositions[isClassic][2][0]+2,
                                     livesPositions[isClassic][2][1]+1, 2, 4);
-      // gb.display.drawBitmap(livesPositions[isClassic][2][0],
-      //                               livesPositions[isClassic][2][1],
-      //                               livesBitmap[isClassic]);
     case 2:
       gb.display.fillRect(livesPositions[isClassic][1][0]+1,
                                     livesPositions[isClassic][1][1]+2, 4, 2);
       gb.display.fillRect(livesPositions[isClassic][1][0]+2,
                                     livesPositions[isClassic][1][1]+1, 2, 4);
-      // gb.display.drawBitmap(livesPositions[isClassic][1][0],
-      //                               livesPositions[isClassic][1][1],
-      //                               livesBitmap[isClassic]);
     case 1:
       gb.display.fillRect(livesPositions[isClassic][0][0]+1,
                                     livesPositions[isClassic][0][1]+2, 4, 2);
       gb.display.fillRect(livesPositions[isClassic][0][0]+2,
                                     livesPositions[isClassic][0][1]+1, 2, 4);
-      // gb.display.drawBitmap(livesPositions[isClassic][0][0],
-      //                               livesPositions[isClassic][0][1],
-      //                               livesBitmap[isClassic]);
   }
 }
+
 
 void drawAmbulance() {
-  // uint8_t posX = ambulancePositions[isClassic][0];
-  // uint8_t posY = ambulancePositions[isClassic][1];
-  //
-  // gb.display.setColor(WHITE);
-  // gb.display.drawBitmap(posX, posY, ambulanceLightBitmap[isClassic]);
-  // gb.display.setColor(GRAY);
-  // gb.display.drawBitmap(posX, posY, ambulanceShadowBitmap[isClassic]);
-  // gb.display.setColor(WHITE, RED);
-  // gb.display.drawBitmap(posX, posY, ambulanceBitmap[isClassic]);
+  uint8_t posX = ambulancePositions[isClassic][0];
+  uint8_t posY = ambulancePositions[isClassic][1];
+  gb.display.drawImage(posX, posY,ambulanceMetaArray[isClassic]);
 }
+
 
 void movePlayer() {
-  //Move player to the left if BUTTON_LEFT pressed
-  if (gb.buttons.pressed(BUTTON_LEFT)) {
+  //Move player to the left if BUTTON_LEFT or BUTTON_A pressed
+  if (gb.buttons.pressed(BUTTON_LEFT) || gb.buttons.pressed(BUTTON_A)) {
     if (playerPosition > 0) {
       playerPosition--;
     }
   }
 
-  //Move player to the left if BUTTON_A pressed
-  if (gb.buttons.pressed(BUTTON_A)) {
-    if (playerPosition > 0) {
-      playerPosition--;
-    }
-  }
-
-  //Move player to the right if BUTTON_RIGHT pressed
-  if (gb.buttons.pressed(BUTTON_RIGHT)) {
-    if (playerPosition < 2) {
-      playerPosition++;
-    }
-  }
-
-  //Move player to the right if BUTTON_B pressed
-  if (gb.buttons.pressed(BUTTON_B)) {
+  //Move player to the right if BUTTON_RIGHT or BUTTON_B pressed
+  if (gb.buttons.pressed(BUTTON_RIGHT) || gb.buttons.pressed(BUTTON_B)) {
     if (playerPosition < 2) {
       playerPosition++;
     }
   }
 }
+
 
 void spawnSurvivor() {
   uint8_t mustSpawn;
@@ -342,133 +290,126 @@ void spawnSurvivor() {
   }
 
   //Spawn if zero
-  if (mustSpawn == 0) {
-    //Search for a blank spot in the array
-    for (int i = 0; i < 10; i++) {
-      if (survivors[i] == NULL) { //found!
-        if (score <= 300) {
-          //Only Third floor
-          floorNo = 0;
-          delayTicks = random(1, 6);
-        } else if (score <= 600) {
-          //Third or second floor
-          floorNo = random(0, 2);
-          delayTicks = random(2, 6);
-        } else {
-          //Any floor
-          floorNo = random(0, 3);
-          delayTicks = random(3, 6);
-        }
+  if (mustSpawn != 0)
+    return;
 
-        //Avoid occupied windows
-        while (occupiedWindows[floorNo]) {
-          if (floorNo > 0) {
-            floorNo--;
-          } else {
-            break;
-          }
-        }
-
-        //If all windows are occupied, try later
-        if (floorNo < 0) {
-          break;
-        }
-
-        //Else, add the new survivor to the array
-        survivors[i] = new Survivor(floorNo, delayTicks);
-
-        noOfSurvivors++;
-        survivorCount++;
-        spawnDelay = 2;
-        break;
-      }
+  //Search for a blank spot in the array
+  for (int i = 0; i < 10; i++) {
+    if (survivors[i] != NULL)
+        continue; // already in use
+    //found!
+    if (score < 300) {
+      //Only Third floor
+      floorNo = 0;
+      delayTicks = random(1, 6);
+    } else if (score < 600) {
+      //Third or second floor
+      floorNo = random(0, 2);
+      delayTicks = random(2, 6);
+    } else {
+      //Any floor
+      floorNo = random(0, 3);
+      delayTicks = random(3, 6);
     }
+
+    //Avoid occupied windows
+    while (occupiedWindows[floorNo]) {
+      if (floorNo == 0)
+        break;
+      floorNo--;
+    }
+
+    //If all windows are occupied, try later
+    if (floorNo < 0)
+      break;
+
+    //Else, add the new survivor to the array
+    survivors[i] = new Survivor(floorNo, delayTicks);
+
+    noOfSurvivors++;
+    survivorCount++;
+    spawnDelay = 2;
+    break;
   }
 }
+
 
 void gameLogic() {
   //Decrement movement tick delay
   moveTick--;
 
   //Game tick
-  if (moveTick <= 0) {
-    moveSurvivors();
+  if (moveTick > 0)
+    return;
+  moveSurvivors();
 
-    gb.sound.playTick();
+/// TODO: add sound again!
+  // gb.sound.playTick();
 
-    //Decrement spawn delay
-    if (spawnDelay > 0) {
-      spawnDelay--;
-    }
+  //Decrement spawn delay
+  if (spawnDelay > 0)
+    spawnDelay--;
 
-    //Get faster with more score
-    if (score <= (13 * 50)) {
-      moveTick = 4 + (13 - (score / 50));
-    } else {
-      moveTick = 4;
-    }
+  //Get faster with higher score
+  if (score <= (13 * 50))
+    moveTick = 4 + (13 - (score / 50));
+  else
+    moveTick = 4;
 
-    //Try to spawn a new survivor
-    if (spawnDelay <= 0) {
-      spawnSurvivor();
-    }
-  }
+  //Try to spawn a new survivor
+  if (spawnDelay <= 0)
+    spawnSurvivor();
 }
+
 
 void moveSurvivors() {
   for (int i = 0; i < 10; i++) {
-    if (survivors[i] != NULL) {
-      //If dead, remove
-      if (survivors[i]->_dead) {
-        delete(survivors[i]);
-        survivors[i] = NULL;
-        noOfSurvivors--;
+    if (survivors[i] == NULL) continue;
+    //If dead, remove
+    if (survivors[i]->_dead) {
+      delete(survivors[i]);
+      survivors[i] = NULL;
+      noOfSurvivors--;
+      continue;
+    }
+
+    //Movement or delay decrementation
+    if (survivors[i]->_delay > 0)
+      survivors[i]->_delay--;
+    else
+      survivors[i]->_step++;
+
+    //Jump logic
+    if ((survivors[i]->_floor == 0 && survivors[i]->_step == 1) ||
+        (survivors[i]->_floor == 1 && survivors[i]->_step == 2) ||
+        (survivors[i]->_floor == 2 && survivors[i]->_step == 3))
+      occupiedWindows[survivors[i]->_floor] = false;
+
+    //After bounce logic
+    if ((survivors[i]->_step == 4) ||
+        (survivors[i]->_step == 10) ||
+        (survivors[i]->_step == 16)) {
+      //Bounced against player; proceed
+      if (survivors[i]->_bounced) {
+        survivors[i]->_bounced = false;
+        score++;
+        //Missed, mark as dead
+      } else {
+        survivors[i]->_dead = true;
+        gb.sound.playCancel();
+        lives--;
+        if (lives <= 0)
+          gameState = STATE_GAMEOVER;
         continue;
       }
+    }
 
-      //Movement or delay decrementation
-      if (survivors[i]->_delay > 0) {
-        survivors[i]->_delay--;
-      } else {
-        survivors[i]->_step++;
-      }
-
-      //Jump logic
-      if ((survivors[i]->_floor == 0 && survivors[i]->_step == 1) ||
-          (survivors[i]->_floor == 1 && survivors[i]->_step == 2) ||
-          (survivors[i]->_floor == 2 && survivors[i]->_step == 3)) {
-
-        occupiedWindows[survivors[i]->_floor] = false;
-      }
-
-      //After bounce logic
-      if ((survivors[i]->_step == 4) ||
-          (survivors[i]->_step == 10) ||
-          (survivors[i]->_step == 16)) {
-
-        //Bounced against player; proceed
-        if (survivors[i]->_bounced) {
-          survivors[i]->_bounced = false;
-          score++;
-          //Missed, mark as dead
-        } else {
-          survivors[i]->_dead = true;
-          gb.sound.playCancel();
-          lives--;
-          if (lives <= 0) {
-            gameState = STATE_GAMEOVER;
-          }
-          continue;
-        }
-      }
-
-      //Got to the ambulance
-      if (survivors[i]->_step >= survivorNumberOfSteps) {
-        delete(survivors[i]);
-        survivors[i] = NULL;
-        noOfSurvivors--;
-        score += 10;
-      }
+    //Got to the ambulance
+    if (survivors[i]->_step >= survivorNumberOfSteps) {
+      delete(survivors[i]);
+      survivors[i] = NULL;
+      noOfSurvivors--;
+      score += 10;
     }
   }
 }
@@ -479,88 +420,64 @@ void drawSurvivors() {
   uint8_t mult;
 
   for (int i = 0; i < 10; i++) {
-    if (survivors[i] != NULL) {
-      if (survivors[i]->_dead) {
-        if (survivors[i]->_step > 10) {
-          posX = survivorKOPositions[isClassic][2][0];
-          posY = survivorKOPositions[isClassic][2][1];
-        } else if (survivors[i]->_step > 4) {
-          posX = survivorKOPositions[isClassic][1][0];
-          posY = survivorKOPositions[isClassic][1][1];
-        } else {
-          posX = survivorKOPositions[isClassic][0][0];
-          posY = survivorKOPositions[isClassic][0][1];
-        }
-
-          /// DEBUG STUFF:
-        gb.display.setColor(WHITE);
-        gb.display.fillRect(posX, posY, 5, 5);
-        // gb.display.drawBitmap(posX, posY, survivor3Bitmap[isClassic]);
+    if (survivors[i] == NULL) continue;
+    if (survivors[i]->_dead) {
+      if (survivors[i]->_step > 10) {
+        posX = survivorKOPositions[isClassic][2][0];
+        posY = survivorKOPositions[isClassic][2][1];
+      } else if (survivors[i]->_step > 4) {
+        posX = survivorKOPositions[isClassic][1][0];
+        posY = survivorKOPositions[isClassic][1][1];
       } else {
-        if (survivors[i]->_delay > 0) {
-          posX = survivorIdlePositions[isClassic][0];
-          posY = survivorIdlePositions[isClassic][1];
-          mult = survivorIdlePositions[isClassic][2];
-          // gb.display.setColor(LIGHTGREEN); /// DEBUG
-          // gb.display.fillRect(posX, posY, 5, 5);
+        posX = survivorKOPositions[isClassic][0][0];
+        posY = survivorKOPositions[isClassic][0][1];
+      }
+      gb.display.drawImage(posX,posX,survivor3MetaArray[isClassic]);
+    } else {
+      if (survivors[i]->_delay > 0) {
+        posX = survivorIdlePositions[isClassic][0];
+        posY = survivorIdlePositions[isClassic][1];
+        mult = survivorIdlePositions[isClassic][2];
 
-          gb.display.drawImage(posX,posY + (survivors[i]->_floor * mult),survivor0MetaArray[isClassic]);
-          // gb.display.drawBitmap(posX, posY + (survivors[i]->_floor * mult), survivor0Bitmap[isClassic]);
-        } else {
-          posX = survivorPositions[isClassic][survivors[i]->_step][0];
-          posY = survivorPositions[isClassic][survivors[i]->_step][1];
+        gb.display.drawImage(posX,posY + (survivors[i]->_floor * mult),survivor0MetaArray[isClassic]);
+        // gb.display.drawBitmap(posX, posY + (survivors[i]->_floor * mult), survivor0Bitmap[isClassic]);
+      } else {
+        posX = survivorPositions[isClassic][survivors[i]->_step][0];
+        posY = survivorPositions[isClassic][survivors[i]->_step][1];
 
-          // gb.display.drawImage(posX,posX,survivor0BitmapMeta);
-          // gb.display.setColor(LIGHTGREEN); /// DEBUG
-          switch (survivorPositions[isClassic][survivors[i]->_step][2]) {
-            case 0:
-              gb.display.drawImage(posX,posX,survivor0MetaArray[isClassic]);
+        switch (survivorPositions[isClassic][survivors[i]->_step][2]) {
+          case 0:
+            gb.display.drawImage(posX,posX,survivor0MetaArray[isClassic]);
+            break;
+          case 1:
+            gb.display.drawImage(posX,posX,survivor1MetaArray[isClassic]);
+            break;
+          case 2:
+            gb.display.drawImage(posX,posX,survivor2MetaArray[isClassic]);
+            break;
+          case 3:
+            gb.display.drawImage(posX,posX,survivor3MetaArray[isClassic]);
+            break;
+          case 4:
+            gb.display.drawImage(posX,posX,survivor4MetaArray[isClassic]);
+            break;
 
-
-              // gb.display.drawBitmap(posX, posY, survivor0Bitmap[isClassic]);
-              // gb.display.fillRect(posX, posY, 5, 5);
-              break;
-            case 1:
-              // gb.display.drawBitmap(posX, posY, survivor1Bitmap[isClassic]);
-              // gb.display.fillRect(posX, posY, 5, 5);
-              break;
-            case 2:
-              // gb.display.drawBitmap(posX, posY, survivor2Bitmap[isClassic]);
-              // gb.display.fillRect(posX, posY, 5, 5);
-              break;
-            case 3:
-              // gb.display.drawBitmap(posX, posY, survivor3Bitmap[isClassic]);
-              // gb.display.fillRect(posX, posY, 5, 5);
-              break;
-            case 4:
-              // gb.display.drawBitmap(posX, posY, survivor4Bitmap[isClassic]);
-              // gb.display.fillRect(posX, posY, 5, 5);
-              break;
-
-            //Flipped horizontally
-            case 5:
-              gb.display.drawImage(posX,posX,survivor0FlipMetaArray[isClassic]);
-              // gb.display.drawBitmap(posX, posY, survivor0Bitmap[isClassic], NOROT, FLIPH);
-              // gb.display.fillRect(posX, posY, 5, 5);
-              break;
-            case 6:
-              // gb.display.drawBitmap(posX, posY, survivor1Bitmap[isClassic], NOROT, FLIPH);
-              // gb.display.fillRect(posX, posY, 5, 5);
-              break;
-            case 7:
-              // gb.display.drawBitmap(posX, posY, survivor2Bitmap[isClassic], NOROT, FLIPH);
-              // gb.display.fillRect(posX, posY, 5, 5);
-              break;
-            case 8:
-              // gb.display.drawBitmap(posX, posY, survivor3Bitmap[isClassic], NOROT, FLIPH);
-              // gb.display.fillRect(posX, posY, 5, 5);
-              break;
-            case 9:
-              // gb.display.drawBitmap(posX, posY, survivor4Bitmap[isClassic], NOROT, FLIPH);
-              // gb.display.fillRect(posX, posY, 5, 5);
-              break;
-
-          }
+          //Flipped horizontally
+          case 5:
+            gb.display.drawImage(posX,posX,survivor0FlipMetaArray[isClassic]);
+            break;
+          case 6:
+            gb.display.drawImage(posX,posX,survivor1FlipMetaArray[isClassic]);
+            break;
+          case 7:
+            gb.display.drawImage(posX,posX,survivor2FlipMetaArray[isClassic]);
+            break;
+          case 8:
+            gb.display.drawImage(posX,posX,survivor3FlipMetaArray[isClassic]);
+            break;
+          case 9:
+            gb.display.drawImage(posX,posX,survivor4FlipMetaArray[isClassic]);
+            break;
         }
       }
     }
@@ -570,12 +487,7 @@ void drawSurvivors() {
 void drawPlayer() {
   uint8_t posX = playerPositions[isClassic][playerPosition][0];
   uint8_t posY = playerPositions[isClassic][playerPosition][1];
-  /// TODO: work on classic mode!
-  gb.display.drawImage(posX,posY,playerBitmapMeta);
-
-  // gb.display.setColor(LIGHTGREEN); /// DEBUG
-  // gb.display.fillRect(posX, posY, 8, 5);
-  // gb.display.drawBitmap(posX, posY, playerBitmap[isClassic]);
+  gb.display.drawImage(posX,posY,playerMetaArray[isClassic]);
 }
 
 void checkBounces() {
@@ -591,6 +503,8 @@ void checkBounces() {
   }
 }
 
+
+//Draw GAME OVER screen
 void drawGameOver() {
   gb.display.setColor(WHITE);
   gb.display.fillRect(24, 20, 37, 7);
@@ -616,6 +530,7 @@ void drawGameOver() {
   gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
   gb.display.print("\x17: Menu");
 }
+
 
 //Based on code from Crabator, by Rodot
 void saveHighscore() {
@@ -653,6 +568,7 @@ void saveHighscore() {
   // }
   // drawHighScores();
 }
+
 
 void drawHighScores() {
   // while (true) {
@@ -699,6 +615,7 @@ void drawHighScores() {
   // }
 }
 
+
 void drawPaused() {
   gb.display.setColor(WHITE);
   gb.display.fillRect(28, 19, (gb.display.getFontWidth() * 6), gb.display.getFontHeight());
@@ -721,6 +638,7 @@ void drawPaused() {
   gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
   gb.display.print("\x17: Quit");
 }
+
 
 void drawCredits() {
   gb.display.fill(BLACK);
@@ -749,19 +667,21 @@ void drawCredits() {
   gb.display.print("\x17: Back");
 }
 
+
 void setup() {
   gb.begin();
   gb.display.init(80, 64, ColorMode::index);
-  titleScreen();
   initGame();
   loadHighscores();
 }
+
 
 void loop() {
   menuScreen();
 
   while (1) {
-    if (gb.update()) {
+    if (!gb.update()) continue;
+
       gb.display.clear();
       if (gameState == STATE_PLAYING || gameState == STATE_PAUSED || gameState == STATE_GAMEOVER) {
         drawBackground();
@@ -770,7 +690,7 @@ void loop() {
         drawScore();
 
         //Draw lives on the top right corner, after the score
-        drawLives();
+        // drawLives();
 
         //Draw the ambulance
         drawAmbulance();
@@ -794,36 +714,28 @@ void loop() {
 
         if (gameState == STATE_PAUSED) {
           drawPaused();
-
           //Unpause
-          if (gb.buttons.pressed(BUTTON_A)) {
+          if (gb.buttons.pressed(BUTTON_A))
             gameState = STATE_PLAYING;
-          }
         }
 
-        if (gameState == STATE_GAMEOVER) {
-          //Draw GAME OVER screen
+      if (gameState == STATE_GAMEOVER)
           drawGameOver();
-        }
-      } else if (gameState == STATE_ABOUT) {
+      else if (gameState == STATE_ABOUT)
         drawCredits();
-      }
 
       //GoTo title screen if C button is pressed
       if (gb.buttons.pressed(BUTTON_C)) {
-        if (gameState == STATE_PLAYING) {
+        if (gameState == STATE_PLAYING)
           gameState = STATE_PAUSED;
-        } else if (gameState == STATE_ABOUT) {
+        else if (gameState == STATE_ABOUT) {
           gb.sound.playOK();
           gameState = STATE_MENU;
           break;
         } else {
           //UPDATE highscore if necessary
-          if (score > minHighscore) {
+          if (score > minHighscore)
             saveHighscore();
-          }
-
-          titleScreen();
           initGame();
           break;
         }
@@ -831,8 +743,6 @@ void loop() {
     }
 
     //Return to menu
-    if (gameState == STATE_MENU) {
-      break;
-    }
+    if (gameState == STATE_MENU) break;
   }
 }
