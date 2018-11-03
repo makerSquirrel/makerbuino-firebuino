@@ -72,24 +72,38 @@ Survivor *survivors[10] = {nullptr}; //max. 10 survivors at the same time
 bool occupiedWindows[3];
 
 // Graphics (declared in graphics.ino)
-// const Image backgroundBitmapMeta = Image(backgroundBitmapMetaData);
-// extern const uint8_t titleScreenBitmap[] PROGMEM;
-// extern const uint8_t subBackgroundBitmap[][530] PROGMEM;
-// extern const uint8_t backgroundBitmap[][530] PROGMEM;
-// extern const uint8_t livesBitmap[][8] PROGMEM;
-// extern const uint8_t livesLightBitmap[][8] PROGMEM;
+/// for animations to work Images are not allowed to be const (and therefore in flash), the Image data shall stay in flash, though...
+Image backgroundBitmapMeta(backgroundBitmapMetaData);
+Image* backgroundMetaArray[] = {&backgroundBitmapMeta, &backgroundBitmapMeta}; /// TODO: add classic graphics
+Image burningfire = Image(burningfireData);
+Image ambulanceBitmapMeta(newAmbulanceData);
+Image* ambulanceMetaArray[] = {&ambulanceBitmapMeta, &ambulanceBitmapMeta};
+Image playerBitmapMeta(playerBitmapMetaData);
+Image* playerMetaArray[] = {&playerBitmapMeta, &playerBitmapMeta};
+Image survivor0BitmapMeta(survivor0BitmapMetaData);
+Image* survivor0MetaArray[] = {&survivor0BitmapMeta, &survivor0BitmapMeta};
+Image survivor0FlipBitmapMeta(survivor0FlipBitmapMetaData);
+Image* survivor0FlipMetaArray[] = {&survivor0FlipBitmapMeta, &survivor0FlipBitmapMeta};
+Image survivor1BitmapMeta(survivor1BitmapMetaData);
+Image* survivor1MetaArray[] = {&survivor1BitmapMeta, &survivor1BitmapMeta};
+Image survivor1FlipBitmapMeta(survivor1FlipBitmapMetaData);
+Image* survivor1FlipMetaArray[] = {&survivor1FlipBitmapMeta, &survivor1FlipBitmapMeta};
+Image survivor2BitmapMeta(survivor2BitmapMetaData);
+Image* survivor2MetaArray[] = {&survivor2BitmapMeta, &survivor2BitmapMeta};
+Image survivor2FlipBitmapMeta(survivor2FlipBitmapMetaData);
+Image* survivor2FlipMetaArray[] = {&survivor2FlipBitmapMeta, &survivor2FlipBitmapMeta};
+Image survivor3BitmapMeta(survivor3BitmapMetaData);
+Image* survivor3MetaArray[] = {&survivor3BitmapMeta, &survivor3BitmapMeta};
+Image survivor3FlipBitmapMeta(survivor3FlipBitmapMetaData);
+Image* survivor3FlipMetaArray[] = {&survivor3FlipBitmapMeta, &survivor3FlipBitmapMeta};
+Image survivor4BitmapMeta(survivor4BitmapMetaData);
+Image* survivor4MetaArray[] = {&survivor4BitmapMeta, &survivor4BitmapMeta};
+Image survivor4FlipBitmapMeta(survivor4FlipBitmapMetaData);
+Image* survivor4FlipMetaArray[] = {&survivor4FlipBitmapMeta, &survivor4FlipBitmapMeta};
+
 extern const uint8_t livesPositions[][3][2];
-// extern const uint8_t ambulanceBitmap[][50] PROGMEM;
-// extern const uint8_t ambulanceShadowBitmap[][50] PROGMEM;
-// extern const uint8_t ambulanceLightBitmap[][50] PROGMEM;
 extern const uint8_t ambulancePositions[][2];
-// extern const uint8_t playerBitmap[][20] PROGMEM;
 extern const uint8_t playerPositions[][3][2];
-// extern const uint8_t survivor0Bitmap[][11] PROGMEM;
-// extern const uint8_t survivor1Bitmap[][10] PROGMEM;
-// extern const uint8_t survivor2Bitmap[][10] PROGMEM;
-// extern const uint8_t survivor3Bitmap[][7] PROGMEM;
-// extern const uint8_t survivor4Bitmap[][9] PROGMEM;
 extern const uint8_t survivorPositions[][survivorNumberOfSteps][3];
 extern const uint8_t survivorIdlePositions[][3];
 extern const uint8_t survivorKOPositions[][3][2];
@@ -165,7 +179,10 @@ void menuScreen() {
 
 
 void drawBackground() {
-  gb.display.drawImage(0, 0,backgroundMetaArray[isClassic]);
+  gb.display.drawImage(0, 0,*backgroundMetaArray[isClassic]);
+  if (isClassic)
+    return;
+  gb.display.drawImage(0, 0,burningfire);  
 }
 
 
@@ -251,7 +268,7 @@ void drawLives() {
 void drawAmbulance() {
   uint8_t posX = ambulancePositions[isClassic][0];
   uint8_t posY = ambulancePositions[isClassic][1];
-  gb.display.drawImage(posX, posY,ambulanceMetaArray[isClassic]);
+  gb.display.drawImage(posX, posY,*ambulanceMetaArray[isClassic]);
 }
 
 
@@ -432,51 +449,50 @@ void drawSurvivors() {
         posX = survivorKOPositions[isClassic][0][0];
         posY = survivorKOPositions[isClassic][0][1];
       }
-      gb.display.drawImage(posX,posX,survivor3MetaArray[isClassic]);
+      gb.display.drawImage(posX,posY,*survivor3MetaArray[isClassic]);
     } else {
       if (survivors[i]->_delay > 0) {
         posX = survivorIdlePositions[isClassic][0];
         posY = survivorIdlePositions[isClassic][1];
         mult = survivorIdlePositions[isClassic][2];
 
-        gb.display.drawImage(posX,posY + (survivors[i]->_floor * mult),survivor0MetaArray[isClassic]);
-        // gb.display.drawBitmap(posX, posY + (survivors[i]->_floor * mult), survivor0Bitmap[isClassic]);
+        gb.display.drawImage(posX,posY + (survivors[i]->_floor * mult),*survivor0MetaArray[isClassic]);
       } else {
         posX = survivorPositions[isClassic][survivors[i]->_step][0];
         posY = survivorPositions[isClassic][survivors[i]->_step][1];
 
         switch (survivorPositions[isClassic][survivors[i]->_step][2]) {
           case 0:
-            gb.display.drawImage(posX,posX,survivor0MetaArray[isClassic]);
+            gb.display.drawImage(posX,posY,*survivor0MetaArray[isClassic]);
             break;
           case 1:
-            gb.display.drawImage(posX,posX,survivor1MetaArray[isClassic]);
+            gb.display.drawImage(posX,posY,*survivor1MetaArray[isClassic]);
             break;
           case 2:
-            gb.display.drawImage(posX,posX,survivor2MetaArray[isClassic]);
+            gb.display.drawImage(posX,posY,*survivor2MetaArray[isClassic]);
             break;
           case 3:
-            gb.display.drawImage(posX,posX,survivor3MetaArray[isClassic]);
+            gb.display.drawImage(posX,posY,*survivor3MetaArray[isClassic]);
             break;
           case 4:
-            gb.display.drawImage(posX,posX,survivor4MetaArray[isClassic]);
+            gb.display.drawImage(posX,posY,*survivor4MetaArray[isClassic]);
             break;
 
           //Flipped horizontally
           case 5:
-            gb.display.drawImage(posX,posX,survivor0FlipMetaArray[isClassic]);
+            gb.display.drawImage(posX,posY,*survivor0FlipMetaArray[isClassic]);
             break;
           case 6:
-            gb.display.drawImage(posX,posX,survivor1FlipMetaArray[isClassic]);
+            gb.display.drawImage(posX,posY,*survivor1FlipMetaArray[isClassic]);
             break;
           case 7:
-            gb.display.drawImage(posX,posX,survivor2FlipMetaArray[isClassic]);
+            gb.display.drawImage(posX,posY,*survivor2FlipMetaArray[isClassic]);
             break;
           case 8:
-            gb.display.drawImage(posX,posX,survivor3FlipMetaArray[isClassic]);
+            gb.display.drawImage(posX,posY,*survivor3FlipMetaArray[isClassic]);
             break;
           case 9:
-            gb.display.drawImage(posX,posX,survivor4FlipMetaArray[isClassic]);
+            gb.display.drawImage(posX,posY,*survivor4FlipMetaArray[isClassic]);
             break;
         }
       }
@@ -484,11 +500,13 @@ void drawSurvivors() {
   }
 }
 
+
 void drawPlayer() {
   uint8_t posX = playerPositions[isClassic][playerPosition][0];
   uint8_t posY = playerPositions[isClassic][playerPosition][1];
-  gb.display.drawImage(posX,posY,playerMetaArray[isClassic]);
+  gb.display.drawImage(posX,posY,*playerMetaArray[isClassic]);
 }
+
 
 void checkBounces() {
   for (int i = 0; i < 10; i++) {
@@ -641,29 +659,31 @@ void drawPaused() {
 
 
 void drawCredits() {
-  gb.display.fill(BLACK);
+  gb.display.fill(DARKBLUE);
   gb.display.setColor(WHITE, BLACK);
   gb.display.cursorX = 22;
-  gb.display.cursorY = 3;
+  gb.display.cursorY = 2;
   gb.display.print("Developer:");
   gb.display.cursorX = 26;
-  gb.display.cursorY = 11;
+  gb.display.cursorY = 10;
   gb.display.print("LADBSoft");
   gb.display.cursorX = 16;
-  gb.display.cursorY = 21;
+  gb.display.cursorY = 20;
   gb.display.print("New graphics:");
   gb.display.cursorX = 32;
-  gb.display.cursorY = 29;
+  gb.display.cursorY = 28;
   gb.display.print("erico");
   gb.display.cursorX = 10;
-  gb.display.cursorY = 39;
-  gb.display.print("META/Color port:");
+  gb.display.cursorY = 38;
+  gb.display.print("METAport/Animations:");
   gb.display.cursorX = 16;
-  gb.display.cursorY = 47;
+  gb.display.cursorY = 46;
   gb.display.print("makerSquirrel");
 
-  gb.display.cursorX = 52;
   gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
+  gb.display.cursorX = 2;
+  gb.display.print("v0.5");
+  gb.display.cursorX = 52;
   gb.display.print("\x17: Back");
 }
 
@@ -690,10 +710,7 @@ void loop() {
         drawScore();
 
         //Draw lives on the top right corner, after the score
-        // drawLives();
-
-        //Draw the ambulance
-        drawAmbulance();
+        drawLives();
 
         if (gameState == STATE_PLAYING) {
           //Move the player acordingly to the pressed buttons
@@ -708,6 +725,9 @@ void loop() {
 
         //Draw all current survivors
         drawSurvivors();
+
+        //Draw the ambulance
+        drawAmbulance();
 
         //Draw the player
         drawPlayer();
