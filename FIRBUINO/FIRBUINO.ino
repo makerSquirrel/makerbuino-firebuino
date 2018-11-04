@@ -19,6 +19,7 @@
 
 #include <Gamebuino-Meta.h>
 #include "graphics.h"
+#include "highscore.h"
 
 #define LCDHEIGHT gb.display.height()
 #define LCDWIDTH gb.display.width()
@@ -54,13 +55,25 @@ class Survivor {
 
 #define HIGHSCORE_COUNT 5
 #define NAME_LETTERS 10
+extern const char g_classicHighScoreName[] = "Classic";
+extern const char g_newHighScoreName[] = "New";
+
+HighScore<uint32_t, 6, 13, g_classicHighScoreName> g_classicHighScore;
+#define SAVE_CLASSIC 0
+HighScore<uint32_t, 6, 13, g_newHighScoreName> g_newHighScore;
+#define SAVE_NEW 1
+
+const SaveDefault savefileDefaults[] = {
+  { SAVE_CLASSIC, SAVETYPE_BLOB, sizeof(g_classicHighScore), 0 },
+  { SAVE_NEW, SAVETYPE_BLOB, sizeof(g_newHighScore), 0 }
+};
 
 uint8_t survivorCount;
 
-long score;
-int highscoreScores[HIGHSCORE_COUNT];
-char highscoreNames[HIGHSCORE_COUNT][NAME_LETTERS + 1];
-long minHighscore;
+uint32_t score;
+// int highscoreScores[HIGHSCORE_COUNT];
+// char highscoreNames[HIGHSCORE_COUNT][NAME_LETTERS + 1];
+uint32_t minHighscore;
 int16_t lives;
 int16_t playerPosition;
 int16_t moveTick;
@@ -101,6 +114,8 @@ Image* survivor4MetaArray[] = {&survivor4BitmapMeta, &survivor4BitmapMeta};
 Image survivor4FlipBitmapMeta(survivor4FlipBitmapMetaData);
 Image* survivor4FlipMetaArray[] = {&survivor4FlipBitmapMeta, &survivor4FlipBitmapMeta};
 
+Image firebuinoMenu = Image(firebuinoMenuData);
+
 extern const uint8_t livesPositions[][3][2];
 extern const uint8_t ambulancePositions[][2];
 extern const uint8_t playerPositions[][3][2];
@@ -108,24 +123,24 @@ extern const uint8_t survivorPositions[][survivorNumberOfSteps][3];
 extern const uint8_t survivorIdlePositions[][3];
 extern const uint8_t survivorKOPositions[][3][2];
 
-//Menu
-const char* menu[]  = {
-  "Play (new)",
-  "Play (classic)",
-  "High scores",
-  "About"
-};
+// //Menu
+// const char* menu[]  = {
+//   "Play (new)",
+//   "Play (classic)",
+//   "High scores",
+//   "About"
+// };
 
 
 void initGame() {
   gb.pickRandomSeed();
 
-  gameState = STATE_MENU;
+  gameState = STATE_PLAYING;
   lives = 3;
   score = 0;
   playerPosition = 1;
   spawnDelay = 2;
-  isClassic = false;
+  // isClassic = false;
   for (int i = 0; i < 10; i++) {
     delete(survivors[i]);
     survivors[i] = NULL;
@@ -140,49 +155,34 @@ void initGame() {
 }
 
 
-//Based on code from Crabator, by Rodot
-void loadHighscores() {
-  // for (uint8_t j = 0; j < HIGHSCORE_COUNT; j++) {
-  //   for (uint8_t i = 0; i < NAME_LETTERS; i++) {
-  //     highscoreNames[j][i] = EEPROM.read(i + j * (NAME_LETTERS + 2));
-  //   }
-  //   highscoreScores[j] = EEPROM.read(NAME_LETTERS + j * (NAME_LETTERS + 2)) & 0x00FF; //LSB
-  //   highscoreScores[j] += (EEPROM.read(NAME_LETTERS + 1 + j * (NAME_LETTERS + 2)) << 8) & 0xFF00; //MSB
-  //   highscoreScores[j] = (highscoreScores[j] == 0xFFFF) ? 0 : highscoreScores[j];
-  //
-  //   minHighscore = highscoreScores[j];
-  // }
-}
-
-
-void menuScreen() {
-  switch (gb.gui.menu("FireBuino Menu", menu)) {
-    case 0: //Play (new)
-      isClassic = false;
-      gameState = STATE_PLAYING;
-      break;
-    case 1: //Play (classic)
-      isClassic = true;
-      gameState = STATE_PLAYING;
-      break;
-    case 2: //Highscores
-      drawHighScores();
-      break;
-    case 3: //About
-      gameState = STATE_ABOUT;
-      break;
-    default:
-      gameState = STATE_MENU;
-      break;
-  }
-}
+// void menuScreen() {
+//   switch (gb.gui.menu("FireBuino Menu", menu)) {
+//     case 0: //Play (new)
+//       isClassic = false;
+//       gameState = STATE_PLAYING;
+//       break;
+//     case 1: //Play (classic)
+//       isClassic = true;
+//       gameState = STATE_PLAYING;
+//       break;
+//     case 2: //Highscores
+//       drawHighScores();
+//       break;
+//     case 3: //About
+//       gameState = STATE_ABOUT;
+//       break;
+//     default:
+//       gameState = STATE_MENU;
+//       break;
+//   }
+// }
 
 
 void drawBackground() {
   gb.display.drawImage(0, 0,*backgroundMetaArray[isClassic]);
   if (isClassic)
     return;
-  gb.display.drawImage(0, 0,burningfire);  
+  gb.display.drawImage(0, 0,burningfire);
 }
 
 
@@ -431,6 +431,7 @@ void moveSurvivors() {
   }
 }
 
+
 void drawSurvivors() {
   uint8_t posX;
   uint8_t posY;
@@ -531,106 +532,60 @@ void drawGameOver() {
   gb.display.cursorY = 21;
   gb.display.print("GAME OVER");
 
-  //Draw "New Highscore!" if a new Highscore was reached
-  if (score > minHighscore) {
-    gb.display.setColor(WHITE);
-    gb.display.fillRect(14, 29, 57, 7);
-    gb.display.setColor(BLACK, WHITE);
-    gb.display.cursorX = 13;
-    gb.display.cursorY = 30;
-    gb.display.print("NEW HIGHSCORE!");
+  if (isClassic)
+  {
+    bool newHighScore = g_classicHighScore.checkHighScore(score);
+    // if (newHighScore)
+    //   gb.sound.fx(highscoreFX);
+    // else
+    //   gb.sound.fx(gameoverFX);
+    g_classicHighScore.showScore(score);
+    if (newHighScore)
+    {
+      g_classicHighScore.updateHighscore(score);
+      gb.save.set( SAVE_CLASSIC , g_classicHighScore );
+    }
+    g_classicHighScore.drawHighScores();
+  }
+  else
+  {
+    bool newHighScore = g_newHighScore.checkHighScore(score);
+    // if (newHighScore)
+    //   gb.sound.fx(highscoreFX);
+    // else
+    //   gb.sound.fx(gameoverFX);
+    g_newHighScore.showScore(score);
+    if (newHighScore)
+    {
+      g_newHighScore.updateHighscore(score);
+      gb.save.set( SAVE_NEW , g_newHighScore );
+    }
+    g_newHighScore.drawHighScores();
   }
 
-  gb.display.setColor(WHITE);
-  gb.display.fillRect(51, LCDHEIGHT - gb.display.getFontHeight(), (gb.display.getFontWidth() * 7), gb.display.getFontHeight());
-  gb.display.setColor(BLACK, WHITE);
-  gb.display.cursorX = 52;
-  gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
-  gb.display.print("\x17: Menu");
+  // //Draw "New Highscore!" if a new Highscore was reached
+  // if (score > minHighscore) {
+  //   gb.display.setColor(WHITE);
+  //   gb.display.fillRect(14, 29, 57, 7);
+  //   gb.display.setColor(BLACK, WHITE);
+  //   gb.display.cursorX = 13;
+  //   gb.display.cursorY = 30;
+  //   gb.display.print("NEW HIGHSCORE!");
+  // }
+
+  // gb.display.setColor(WHITE);
+  // gb.display.fillRect(51, LCDHEIGHT - gb.display.getFontHeight(), (gb.display.getFontWidth() * 7), gb.display.getFontHeight());
+  // gb.display.setColor(BLACK, WHITE);
+  // gb.display.cursorX = 52;
+  // gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
+  // gb.display.print("\x17: Menu");
 }
 
 
-//Based on code from Crabator, by Rodot
-void saveHighscore() {
-  // gb.getDefaultName(highscoreNames[HIGHSCORE_COUNT - 1]);
-  // gb.keyboard(highscoreNames[HIGHSCORE_COUNT - 1], NAME_LETTERS + 1);
-  // highscoreScores[HIGHSCORE_COUNT - 1] = score;
-  //
-  // //Sort highscores
-  // for (uint8_t i = HIGHSCORE_COUNT - 1; i > 0; i--) {
-  //   if (highscoreScores[i - 1] < highscoreScores[i]) {
-  //     char tempName[NAME_LETTERS];
-  //     strcpy(tempName, highscoreNames[i - 1]);
-  //     strcpy(highscoreNames[i - 1], highscoreNames[i]);
-  //     strcpy(highscoreNames[i], tempName);
-  //     unsigned int tempScore;
-  //     tempScore = highscoreScores[i - 1];
-  //     highscoreScores[i - 1] = highscoreScores[i];
-  //     highscoreScores[i] = tempScore;
-  //
-  //     //update minimum highscore
-  //     minHighscore = highscoreScores[i];
-  //   }
-  //   else {
-  //     break;
-  //   }
-  // }
-  //
-  // //Save highscores in EEPROM
-  // for (uint8_t j = 0; j < HIGHSCORE_COUNT; j++) {
-  //   for (uint8_t i = 0; i < NAME_LETTERS; i++) {
-  //     EEPROM.write(i + j * (NAME_LETTERS + 2), highscoreNames[j][i]);
-  //   }
-  //   EEPROM.write(NAME_LETTERS + j * (NAME_LETTERS + 2), highscoreScores[j] & 0x00FF); //LSB
-  //   EEPROM.write(NAME_LETTERS + 1 + j * (NAME_LETTERS + 2), (highscoreScores[j] >> 8) & 0x00FF); //MSB
-  // }
-  // drawHighScores();
-}
-
-
-void drawHighScores() {
-  // while (true) {
-  //   if (gb.update()) {
-  //     gb.display.drawRect(0, 0, LCDWIDTH, LCDHEIGHT);
-  //
-  //     //Title
-  //     gb.display.cursorX = 20;
-  //     gb.display.cursorY = 3;
-  //     gb.display.println(F("HIGH SCORES"));
-  //
-  //     gb.display.cursorY = gb.display.fontHeight * 2;
-  //     for (uint8_t i = 0; i < HIGHSCORE_COUNT; i++) {
-  //       gb.display.cursorX = 6;
-  //
-  //       //Name
-  //       if (highscoreScores[i] == 0) {
-  //         gb.display.print('-');
-  //       } else {
-  //         gb.display.print(highscoreNames[i]);
-  //       }
-  //
-  //       //Score
-  //       if (highscoreScores[i] > 9999) {
-  //         gb.display.cursorX = LCDWIDTH - 6 - 5 * gb.display.fontWidth;
-  //       } else if (highscoreScores[i] > 999) {
-  //         gb.display.cursorX = LCDWIDTH - 6 - 4 * gb.display.fontWidth;
-  //       } else if (highscoreScores[i] > 99) {
-  //         gb.display.cursorX = LCDWIDTH - 6 - 3 * gb.display.fontWidth;
-  //       } else if (highscoreScores[i] > 9) {
-  //         gb.display.cursorX = LCDWIDTH - 6 - 2 * gb.display.fontWidth;
-  //       } else {
-  //         gb.display.cursorX = LCDWIDTH - 6 - gb.display.fontWidth;
-  //       }
-  //       gb.display.cursorY = (gb.display.fontHeight * 2) + (gb.display.fontHeight * i);
-  //       gb.display.println(highscoreScores[i]);
-  //     }
-  //
-  //     if (gb.buttons.pressed(BUTTON_A) || gb.buttons.pressed(BUTTON_B) || gb.buttons.pressed(BUTTON_C)) {
-  //       gb.sound.playOK();
-  //       break;
-  //     }
-  //   }
-  // }
+void drawHighScores()
+{
+  g_classicHighScore.drawHighScores();
+  g_newHighScore.drawHighScores();
 }
 
 
@@ -659,110 +614,201 @@ void drawPaused() {
 
 
 void drawCredits() {
-  gb.display.fill(DARKBLUE);
-  gb.display.setColor(WHITE, BLACK);
-  gb.display.cursorX = 22;
-  gb.display.cursorY = 2;
-  gb.display.print("Developer:");
-  gb.display.cursorX = 26;
-  gb.display.cursorY = 10;
-  gb.display.print("LADBSoft");
-  gb.display.cursorX = 16;
-  gb.display.cursorY = 20;
-  gb.display.print("New graphics:");
-  gb.display.cursorX = 32;
-  gb.display.cursorY = 28;
-  gb.display.print("erico");
-  gb.display.cursorX = 10;
-  gb.display.cursorY = 38;
-  gb.display.print("METAport/Animations:");
-  gb.display.cursorX = 16;
-  gb.display.cursorY = 46;
-  gb.display.print("makerSquirrel");
+  while (true) {
+    if (!gb.update())
+        continue;
+    gb.display.clear();
+    gb.display.fill(DARKBLUE);
+    gb.display.setColor(WHITE, DARKBLUE);
+    gb.display.cursorX = 22;
+    gb.display.cursorY = 2;
+    gb.display.print("Developer:");
+    gb.display.cursorX = 26;
+    gb.display.cursorY = 10;
+    gb.display.print("LADBSoft");
+    gb.display.cursorX = 16;
+    gb.display.cursorY = 20;
+    gb.display.print("New graphics:");
+    gb.display.cursorX = 32;
+    gb.display.cursorY = 28;
+    gb.display.print("erico");
+    gb.display.cursorX = 0;
+    gb.display.cursorY = 38;
+    gb.display.print("METAport/Animations:");
+    gb.display.cursorX = 16;
+    gb.display.cursorY = 46;
+    gb.display.print("makerSquirrel");
 
-  gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
-  gb.display.cursorX = 2;
-  gb.display.print("v0.5");
-  gb.display.cursorX = 52;
-  gb.display.print("\x17: Back");
+    gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
+    gb.display.cursorX = 2;
+    gb.display.print("v0.5");
+    gb.display.cursorX = 52;
+    // gb.display.print("\x17: Back");
+    if (gb.buttons.pressed(BUTTON_A) || gb.buttons.pressed(BUTTON_B) || gb.buttons.pressed(BUTTON_MENU)) {
+        gb.sound.playOK();
+        break;
+    }
+  }
 }
 
 
 void setup() {
   gb.begin();
   gb.display.init(80, 64, ColorMode::index);
+  gb.display.drawImage(0,0,firebuinoMenu);
   initGame();
-  loadHighscores();
+  gb.save.config(savefileDefaults);
+  gb.save.get(SAVE_NEW, g_newHighScore);
+  g_newHighScore.setTextColor(YELLOW);
+  g_newHighScore.setBgColor(DARKBLUE);
+  gb.save.get(SAVE_CLASSIC, g_classicHighScore);
+  g_classicHighScore.setTextColor(YELLOW);
+  g_classicHighScore.setTextColor(DARKBLUE);
 }
 
 
-void loop() {
-  menuScreen();
+void loop()
+{
+  menuLoop();
+}
 
+
+// basically a rect around current menu selection
+void setMenuCursor(uint8_t xSelect, uint8_t ySelect)
+{
+  xSelect = xSelect == 0 ? 1 : 41;
+  uint8_t height = 18;
+  uint8_t width = 38;
+  ySelect = ySelect == 0 ? 25 : 44;
+  gb.display.setColor(RED);
+  gb.display.drawRect(xSelect, ySelect,width, height);
+}
+
+
+void menuLoop()
+{
+  // gb.display.setFont(font5x7);
+  uint8_t menuXPos = 0;
+  uint8_t menuYPos = 0;
+  while(true)
+  {
+    if(!gb.update())
+      continue;
+    gb.display.clear();
+    gb.display.drawImage(0, 0, firebuinoMenu);
+
+    if (gb.buttons.repeat(BUTTON_UP, 4) && menuYPos > 0)
+      menuYPos--;
+    if (gb.buttons.repeat(BUTTON_DOWN, 4) && menuYPos < 1)
+      menuYPos++;
+    if (gb.buttons.repeat(BUTTON_LEFT, 4) && menuXPos > 0)
+      menuXPos--;
+    if (gb.buttons.repeat(BUTTON_RIGHT, 4) && menuXPos < 1)
+      menuXPos++;
+
+    setMenuCursor(menuXPos, menuYPos);
+
+    if (!gb.buttons.pressed(BUTTON_A) && !gb.buttons.pressed(BUTTON_B))
+      continue;
+    if (menuXPos == 0 && menuYPos == 0) // Start Game
+    {
+      isClassic = false;
+      gameState = STATE_PLAYING;
+      initGame();
+      gameLoop();
+    }
+    else if (menuXPos == 1 && menuYPos == 0) // Use the classic start
+    {
+      isClassic = true;
+      gameState = STATE_PLAYING;
+      initGame();
+      gameLoop();
+    }
+    else if (menuXPos == 0 && menuYPos == 1) // Show Highscore
+    {
+      g_classicHighScore.drawHighScores();
+      g_newHighScore.drawHighScores();
+    }
+    else if (menuXPos == 1 && menuYPos == 1) // Show the credits
+      drawCredits();
+  }
+}
+
+
+void gameLoop() {
+  // menuScreen();
   while (1) {
     if (!gb.update()) continue;
 
-      gb.display.clear();
-      if (gameState == STATE_PLAYING || gameState == STATE_PAUSED || gameState == STATE_GAMEOVER) {
-        drawBackground();
+    gb.display.clear();
+    // if (gameState == STATE_PLAYING || gameState == STATE_PAUSED || gameState == STATE_GAMEOVER) {
+      drawBackground();
 
-        //Draw score on the top right corner, before the number of lives
-        drawScore();
+      //Draw score on the top right corner, before the number of lives
+      drawScore();
 
-        //Draw lives on the top right corner, after the score
-        drawLives();
+      //Draw lives on the top right corner, after the score
+      drawLives();
 
-        if (gameState == STATE_PLAYING) {
-          //Move the player acordingly to the pressed buttons
-          movePlayer();
+      if (gameState == STATE_PLAYING) {
+        //Move the player acordingly to the pressed buttons
+        movePlayer();
 
-          //Do game stuff (delays, spawning...)
-          gameLogic();
+        //Do game stuff (delays, spawning...)
+        gameLogic();
 
-          //Check collisions with player
-          checkBounces();
-        }
+        //Check collisions with player
+        checkBounces();
+      }
 
-        //Draw all current survivors
-        drawSurvivors();
+      //Draw all current survivors
+      drawSurvivors();
 
-        //Draw the ambulance
-        drawAmbulance();
+      //Draw the ambulance
+      drawAmbulance();
 
-        //Draw the player
-        drawPlayer();
+      //Draw the player
+      drawPlayer();
 
-        if (gameState == STATE_PAUSED) {
-          drawPaused();
-          //Unpause
-          if (gb.buttons.pressed(BUTTON_A))
-            gameState = STATE_PLAYING;
-        }
+      if (gameState == STATE_PAUSED) {
+        drawPaused();
+        //Unpause
+        if (gb.buttons.pressed(BUTTON_A) || gb.buttons.pressed(BUTTON_B))
+          gameState = STATE_PLAYING;
+        else if (gb.buttons.pressed(BUTTON_MENU))
+            break;
+      }
 
       if (gameState == STATE_GAMEOVER)
+      {
           drawGameOver();
-      else if (gameState == STATE_ABOUT)
-        drawCredits();
+          break;
+      }
+      // else if (gameState == STATE_ABOUT)
+      // {
+      //   drawCredits();
+      //   gameState = STATE_MENU;
+      // }
 
       //GoTo title screen if C button is pressed
-      if (gb.buttons.pressed(BUTTON_C)) {
+      if (gb.buttons.pressed(BUTTON_MENU)) {
         if (gameState == STATE_PLAYING)
           gameState = STATE_PAUSED;
-        else if (gameState == STATE_ABOUT) {
-          gb.sound.playOK();
-          gameState = STATE_MENU;
-          break;
-        } else {
-          //UPDATE highscore if necessary
-          if (score > minHighscore)
-            saveHighscore();
-          initGame();
-          break;
-        }
+        // else if (gameState == STATE_ABOUT) {
+        //   gb.sound.playOK();
+        //   gameState = STATE_MENU;
+        //   break;
+        // } else {
+        //   //UPDATE highscore if necessary
+        //   // if (score > minHighscore)
+        //   //   saveHighscore();
+        //
+        //   initGame();
+        //   break;
+        // }
       }
-    }
-
+    // }
     //Return to menu
-    if (gameState == STATE_MENU) break;
+    // if (gameState == STATE_MENU) break;
   }
 }
