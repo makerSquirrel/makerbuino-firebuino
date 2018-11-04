@@ -45,17 +45,17 @@ bool HighScore<HighscoreType, nHighScoreEntries, gamerNameLength, highScore>::sh
             continue;
         // gb.display.clear();
         gb.display.setColor(m_bgColor);
-        gb.display.fillRect(leftPos, 2, maxWidth, 35);
+        gb.display.fillRect(leftPos, 10, maxWidth, 35);
         gb.display.setColor(m_textColor);
-        gb.display.cursorY = 3;
-        gb.display.cursorX = leftPos+1+2*gb.display.getFontWidth();
+        gb.display.cursorY = 11;
+        gb.display.cursorX = leftPos+3+2*gb.display.getFontWidth();
         gb.display.println(F("GAME OVER!"));
         gb.display.println(F(""));
         gb.display.cursorX = leftPos+1+2*gb.display.getFontWidth();
         gb.display.println(F("YOUR SCORE:"));
         gb.display.cursorX = leftPos + maxWidth/2 - 5;
         gb.display.println(score);
-        gb.display.cursorX = leftPos+1;
+        gb.display.cursorX = leftPos+3;
         if (isHighScore)
             gb.display.println(F("NEW HIGHSCORE!"));
         if (gb.buttons.pressed(BUTTON_A) || gb.buttons.pressed(BUTTON_B) || gb.buttons.pressed(BUTTON_MENU))

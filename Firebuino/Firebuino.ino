@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------
 |  Author: Luis Dominguez - LADBSoft.com                          |
 |          makserSquirrel (META port)                             |
-|  Date: 04/11/2018                                 Version: 0.7  |
+|  Date: 04/11/2018                                 Version: 0.8  |
 |-----------------------------------------------------------------|
 |  Name: FireBuino!                                               |
 |  Description: Remake of the classic Game&Watch Fire, from 1980. |
@@ -18,7 +18,8 @@
 |  1.4b: Finally solved the bug that made no more survivors to    |
          spawn! Remember, freeing memory is good :P               |
 |  Meta Version:                                                  |
-|  0.7:  Port of new graphics version done. Highscores work.      |
+|  0.8:  Port of Meta version works with high scores.             |
+/        LEDs and sound missing                                   |
 |----------------------------------------------------------------*/
 
 #include <Gamebuino-Meta.h>
@@ -89,32 +90,40 @@ bool occupiedWindows[3];
 // Graphics (declared in graphics.ino)
 /// for animations to work Images are not allowed to be const (and therefore in flash), the Image data shall stay in flash, though...
 Image backgroundBitmapMeta(backgroundBitmapMetaData);
-Image* backgroundMetaArray[] = {&backgroundBitmapMeta, &backgroundBitmapMeta}; /// TODO: add classic graphics
-Image burningfire = Image(burningfireData);
+Image BackgroundClassic(BackgroundClassicData);
+Image* backgroundMetaArray[] = {&backgroundBitmapMeta, &BackgroundClassic}; /// TODO: add classic graphics
+Image burningfire(burningfireData);
 Image ambulanceBitmapMeta(newAmbulanceData);
-Image* ambulanceMetaArray[] = {&ambulanceBitmapMeta, &ambulanceBitmapMeta};
+Image AmbulanceLightClassic(AmbulanceLightClassicData); // only the blinking light, not the full ambulance
+Image* ambulanceMetaArray[] = {&ambulanceBitmapMeta, &AmbulanceLightClassic};
 Image playerBitmapMeta(playerBitmapMetaData);
-Image* playerMetaArray[] = {&playerBitmapMeta, &playerBitmapMeta};
+Image playerBitmapClassic(playerBitmapClassicData);
+Image* playerMetaArray[] = {&playerBitmapMeta, &playerBitmapClassic};
 Image survivor0BitmapMeta(survivor0BitmapMetaData);
-Image* survivor0MetaArray[] = {&survivor0BitmapMeta, &survivor0BitmapMeta};
+Image survivor0BitmapClassic(survivor0BitmapClassicData);
+Image* survivor0MetaArray[] = {&survivor0BitmapMeta, &survivor0BitmapClassic};
 Image survivor0FlipBitmapMeta(survivor0FlipBitmapMetaData);
-Image* survivor0FlipMetaArray[] = {&survivor0FlipBitmapMeta, &survivor0FlipBitmapMeta};
+Image* survivor0FlipMetaArray[] = {&survivor0FlipBitmapMeta, &survivor0BitmapClassic};
 Image survivor1BitmapMeta(survivor1BitmapMetaData);
-Image* survivor1MetaArray[] = {&survivor1BitmapMeta, &survivor1BitmapMeta};
+Image survivor1BitmapClassic(survivor1BitmapClassicData);
+Image* survivor1MetaArray[] = {&survivor1BitmapMeta, &survivor1BitmapClassic};
 Image survivor1FlipBitmapMeta(survivor1FlipBitmapMetaData);
-Image* survivor1FlipMetaArray[] = {&survivor1FlipBitmapMeta, &survivor1FlipBitmapMeta};
+Image* survivor1FlipMetaArray[] = {&survivor1FlipBitmapMeta, &survivor1BitmapClassic};
 Image survivor2BitmapMeta(survivor2BitmapMetaData);
-Image* survivor2MetaArray[] = {&survivor2BitmapMeta, &survivor2BitmapMeta};
+Image survivor2BitmapClassic(survivor2BitmapClassicData);
+Image* survivor2MetaArray[] = {&survivor2BitmapMeta, &survivor2BitmapClassic};
 Image survivor2FlipBitmapMeta(survivor2FlipBitmapMetaData);
-Image* survivor2FlipMetaArray[] = {&survivor2FlipBitmapMeta, &survivor2FlipBitmapMeta};
+Image* survivor2FlipMetaArray[] = {&survivor2FlipBitmapMeta, &survivor2BitmapClassic};
 Image survivor3BitmapMeta(survivor3BitmapMetaData);
-Image* survivor3MetaArray[] = {&survivor3BitmapMeta, &survivor3BitmapMeta};
+Image survivor3BitmapClassic(survivor3BitmapClassicData);
+Image* survivor3MetaArray[] = {&survivor3BitmapMeta, &survivor3BitmapClassic};
 Image survivor3FlipBitmapMeta(survivor3FlipBitmapMetaData);
-Image* survivor3FlipMetaArray[] = {&survivor3FlipBitmapMeta, &survivor3FlipBitmapMeta};
+Image* survivor3FlipMetaArray[] = {&survivor3FlipBitmapMeta, &survivor3BitmapClassic};
 Image survivor4BitmapMeta(survivor4BitmapMetaData);
-Image* survivor4MetaArray[] = {&survivor4BitmapMeta, &survivor4BitmapMeta};
+Image survivor4BitmapClassic(survivor4BitmapClassicData);
+Image* survivor4MetaArray[] = {&survivor4BitmapMeta, &survivor4BitmapClassic};
 Image survivor4FlipBitmapMeta(survivor4FlipBitmapMetaData);
-Image* survivor4FlipMetaArray[] = {&survivor4FlipBitmapMeta, &survivor4FlipBitmapMeta};
+Image* survivor4FlipMetaArray[] = {&survivor4FlipBitmapMeta, &survivor4BitmapClassic};
 
 Image firebuinoMenu = Image(firebuinoMenuData);
 
@@ -580,16 +589,16 @@ void drawCredits() {
     gb.display.cursorX = 32;
     gb.display.cursorY = 28;
     gb.display.print("erico");
-    gb.display.cursorX = 1;
+    gb.display.cursorX = 2;
     gb.display.cursorY = 38;
-    gb.display.print("METAport/Animations:");
-    gb.display.cursorX = 16;
+    gb.display.print("METAport&Animations");
+    gb.display.cursorX = 2;
     gb.display.cursorY = 46;
-    gb.display.print("makerSquirrel");
+    gb.display.print("makerSquirrel et al");
 
     gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
     gb.display.cursorX = 2;
-    gb.display.print("v0.7");
+    gb.display.print("v0.8");
     gb.display.cursorX = 52;
     // gb.display.print("\x17: Back");
     if (gb.buttons.pressed(BUTTON_A) || gb.buttons.pressed(BUTTON_B) || gb.buttons.pressed(BUTTON_MENU)) {
