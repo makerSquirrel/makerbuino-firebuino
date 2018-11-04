@@ -1,12 +1,14 @@
 /*-----------------------------------------------------------------
 |  Author: Luis Dominguez - LADBSoft.com                          |
-|  Date: 31/07/2017                                 Version: 1.4b |
+|          makserSquirrel (META port)                             |
+|  Date: 04/11/2018                                 Version: 0.7  |
 |-----------------------------------------------------------------|
 |  Name: FireBuino!                                               |
 |  Description: Remake of the classic Game&Watch Fire, from 1980. |
 |-----------------------------------------------------------------|
 |   C H A N G E L O G                                             |
 |  ===================                                            |
+|  Classic version:                                               |
 |  1.0b: Basic functionality.                                     |
 |  1.1b: Bug corrections and speed tweaking.                      |
 |  1.2b: Added new graphics by Erico Patricio Monteiro. Added     |
@@ -15,6 +17,8 @@
 |        tweaked. Minor enhancements.                             |
 |  1.4b: Finally solved the bug that made no more survivors to    |
          spawn! Remember, freeing memory is good :P               |
+|  Meta Version:                                                  |
+|  0.7:  Port of new graphics version done. Highscores work.      |
 |----------------------------------------------------------------*/
 
 #include <Gamebuino-Meta.h>
@@ -71,8 +75,6 @@ const SaveDefault savefileDefaults[] = {
 uint8_t survivorCount;
 
 uint32_t score;
-// int highscoreScores[HIGHSCORE_COUNT];
-// char highscoreNames[HIGHSCORE_COUNT][NAME_LETTERS + 1];
 uint32_t minHighscore;
 int16_t lives;
 int16_t playerPosition;
@@ -123,14 +125,6 @@ extern const uint8_t survivorPositions[][survivorNumberOfSteps][3];
 extern const uint8_t survivorIdlePositions[][3];
 extern const uint8_t survivorKOPositions[][3][2];
 
-// //Menu
-// const char* menu[]  = {
-//   "Play (new)",
-//   "Play (classic)",
-//   "High scores",
-//   "About"
-// };
-
 
 void initGame() {
   gb.pickRandomSeed();
@@ -140,7 +134,6 @@ void initGame() {
   score = 0;
   playerPosition = 1;
   spawnDelay = 2;
-  // isClassic = false;
   for (int i = 0; i < 10; i++) {
     delete(survivors[i]);
     survivors[i] = NULL;
@@ -153,29 +146,6 @@ void initGame() {
   }
   occupiedWindows[0] = true;
 }
-
-
-// void menuScreen() {
-//   switch (gb.gui.menu("FireBuino Menu", menu)) {
-//     case 0: //Play (new)
-//       isClassic = false;
-//       gameState = STATE_PLAYING;
-//       break;
-//     case 1: //Play (classic)
-//       isClassic = true;
-//       gameState = STATE_PLAYING;
-//       break;
-//     case 2: //Highscores
-//       drawHighScores();
-//       break;
-//     case 3: //About
-//       gameState = STATE_ABOUT;
-//       break;
-//     default:
-//       gameState = STATE_MENU;
-//       break;
-//   }
-// }
 
 
 void drawBackground() {
@@ -233,6 +203,7 @@ void drawScore() {
 }
 
 
+/// TODO: reverse order of live signs!
 void drawLives() {
   gb.display.setColor(WHITE);
   switch (lives) {
@@ -525,16 +496,10 @@ void checkBounces() {
 
 //Draw GAME OVER screen
 void drawGameOver() {
-  gb.display.setColor(WHITE);
-  gb.display.fillRect(24, 20, 37, 7);
-  gb.display.setColor(BLACK, WHITE);
-  gb.display.cursorX = 23;
-  gb.display.cursorY = 21;
-  gb.display.print("GAME OVER");
-
   if (isClassic)
   {
     bool newHighScore = g_classicHighScore.checkHighScore(score);
+    /// TODO: sound effects!
     // if (newHighScore)
     //   gb.sound.fx(highscoreFX);
     // else
@@ -562,23 +527,6 @@ void drawGameOver() {
     }
     g_newHighScore.drawHighScores();
   }
-
-  // //Draw "New Highscore!" if a new Highscore was reached
-  // if (score > minHighscore) {
-  //   gb.display.setColor(WHITE);
-  //   gb.display.fillRect(14, 29, 57, 7);
-  //   gb.display.setColor(BLACK, WHITE);
-  //   gb.display.cursorX = 13;
-  //   gb.display.cursorY = 30;
-  //   gb.display.print("NEW HIGHSCORE!");
-  // }
-
-  // gb.display.setColor(WHITE);
-  // gb.display.fillRect(51, LCDHEIGHT - gb.display.getFontHeight(), (gb.display.getFontWidth() * 7), gb.display.getFontHeight());
-  // gb.display.setColor(BLACK, WHITE);
-  // gb.display.cursorX = 52;
-  // gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
-  // gb.display.print("\x17: Menu");
 }
 
 
@@ -632,7 +580,7 @@ void drawCredits() {
     gb.display.cursorX = 32;
     gb.display.cursorY = 28;
     gb.display.print("erico");
-    gb.display.cursorX = 0;
+    gb.display.cursorX = 1;
     gb.display.cursorY = 38;
     gb.display.print("METAport/Animations:");
     gb.display.cursorX = 16;
@@ -641,7 +589,7 @@ void drawCredits() {
 
     gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
     gb.display.cursorX = 2;
-    gb.display.print("v0.5");
+    gb.display.print("v0.7");
     gb.display.cursorX = 52;
     // gb.display.print("\x17: Back");
     if (gb.buttons.pressed(BUTTON_A) || gb.buttons.pressed(BUTTON_B) || gb.buttons.pressed(BUTTON_MENU)) {
@@ -687,7 +635,6 @@ void setMenuCursor(uint8_t xSelect, uint8_t ySelect)
 
 void menuLoop()
 {
-  // gb.display.setFont(font5x7);
   uint8_t menuXPos = 0;
   uint8_t menuYPos = 0;
   while(true)
@@ -736,12 +683,10 @@ void menuLoop()
 
 
 void gameLoop() {
-  // menuScreen();
   while (1) {
     if (!gb.update()) continue;
 
     gb.display.clear();
-    // if (gameState == STATE_PLAYING || gameState == STATE_PAUSED || gameState == STATE_GAMEOVER) {
       drawBackground();
 
       //Draw score on the top right corner, before the number of lives
@@ -784,31 +729,10 @@ void gameLoop() {
           drawGameOver();
           break;
       }
-      // else if (gameState == STATE_ABOUT)
-      // {
-      //   drawCredits();
-      //   gameState = STATE_MENU;
-      // }
 
-      //GoTo title screen if C button is pressed
       if (gb.buttons.pressed(BUTTON_MENU)) {
         if (gameState == STATE_PLAYING)
           gameState = STATE_PAUSED;
-        // else if (gameState == STATE_ABOUT) {
-        //   gb.sound.playOK();
-        //   gameState = STATE_MENU;
-        //   break;
-        // } else {
-        //   //UPDATE highscore if necessary
-        //   // if (score > minHighscore)
-        //   //   saveHighscore();
-        //
-        //   initGame();
-        //   break;
-        // }
       }
-    // }
-    //Return to menu
-    // if (gameState == STATE_MENU) break;
   }
 }
