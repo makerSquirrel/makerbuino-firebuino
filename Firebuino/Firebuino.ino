@@ -1,7 +1,7 @@
 /*-----------------------------------------------------------------
 |  Author: Luis Dominguez - LADBSoft.com                          |
-|          makserSquirrel (META port)                             |
-|  Date: 04/11/2018                                 Version: 0.8  |
+|          makerSquirrel (META port)                              |
+|  Date: 24/12/2018                                 Version: 1.0  |
 |-----------------------------------------------------------------|
 |  Name: FireBuino!                                               |
 |  Description: Remake of the classic Game&Watch Fire, from 1980. |
@@ -19,12 +19,13 @@
          spawn! Remember, freeing memory is good :P               |
 |  Meta Version:                                                  |
 |  0.8:  Port of Meta version works with high scores.             |
-/        LEDs and sound missing                                   |
+/  1.0:  Added LED and sound fx                                   |
 |----------------------------------------------------------------*/
 
 #include <Gamebuino-Meta.h>
 #include "graphics.h"
 #include "highscore.h"
+#include "soundfx.h"
 
 #define LCDHEIGHT gb.display.height()
 #define LCDWIDTH gb.display.width()
@@ -126,6 +127,8 @@ Image survivor4FlipBitmapMeta(survivor4FlipBitmapMetaData);
 Image* survivor4FlipMetaArray[] = {&survivor4FlipBitmapMeta, &survivor4BitmapClassic};
 
 Image firebuinoMenu = Image(firebuinoMenuData);
+// Image ledLights = Image(ledLightsData);
+Image ledLights = Image(ledLightsDarkData);
 
 extern const uint8_t livesPositions[][3][2];
 extern const uint8_t ambulancePositions[][2];
@@ -162,6 +165,7 @@ void drawBackground() {
   if (isClassic)
     return;
   gb.display.drawImage(0, 0,burningfire);
+  gb.lights.drawImage(0,0, ledLights);
 }
 
 
@@ -340,8 +344,7 @@ void gameLogic() {
     return;
   moveSurvivors();
 
-/// TODO: add sound again!
-  // gb.sound.playTick();
+  gb.sound.playTick();
 
   //Decrement spawn delay
   if (spawnDelay > 0)
@@ -352,6 +355,8 @@ void gameLogic() {
     moveTick = 4 + (13 - (score / 50));
   else
     moveTick = 4;
+  if (moveTick > 13) // hack for speeding up the beginning of the game only
+    moveTick = 13;
 
   //Try to spawn a new survivor
   if (spawnDelay <= 0)
@@ -496,8 +501,15 @@ void checkBounces() {
           (survivors[i]->_step == 9 && playerPosition == 1) ||
           (survivors[i]->_step == 15 && playerPosition == 2)) {
         survivors[i]->_bounced = true;
-        gb.sound.playOK();
+        // gb.sound.playOK();
       }
+      /// handle soundfx:
+      if ((survivors[i]->_step == 3) && survivors[i]->_bounced)
+        gb.sound.fx(bounce1);
+      else if ((survivors[i]->_step == 9) && survivors[i]->_bounced)
+        gb.sound.fx(bounce2);
+      else if ((survivors[i]->_step == 15) && survivors[i]->_bounced)
+        gb.sound.fx(bounce3);
     }
   }
 }
@@ -505,14 +517,13 @@ void checkBounces() {
 
 //Draw GAME OVER screen
 void drawGameOver() {
+  bool newHighScore = isClassic ? g_classicHighScore.checkHighScore(score) : g_newHighScore.checkHighScore(score);
+  if (newHighScore)
+    gb.sound.fx(highscoreFX);
+  else
+    gb.sound.fx(gameoverFX);
   if (isClassic)
   {
-    bool newHighScore = g_classicHighScore.checkHighScore(score);
-    /// TODO: sound effects!
-    // if (newHighScore)
-    //   gb.sound.fx(highscoreFX);
-    // else
-    //   gb.sound.fx(gameoverFX);
     g_classicHighScore.showScore(score);
     if (newHighScore)
     {
@@ -523,11 +534,6 @@ void drawGameOver() {
   }
   else
   {
-    bool newHighScore = g_newHighScore.checkHighScore(score);
-    // if (newHighScore)
-    //   gb.sound.fx(highscoreFX);
-    // else
-    //   gb.sound.fx(gameoverFX);
     g_newHighScore.showScore(score);
     if (newHighScore)
     {
@@ -598,7 +604,7 @@ void drawCredits() {
 
     gb.display.cursorY = LCDHEIGHT - gb.display.getFontHeight();
     gb.display.cursorX = 2;
-    gb.display.print("v0.8");
+    gb.display.print("v1.0 Dec24-2018");
     gb.display.cursorX = 52;
     // gb.display.print("\x17: Back");
     if (gb.buttons.pressed(BUTTON_A) || gb.buttons.pressed(BUTTON_B) || gb.buttons.pressed(BUTTON_MENU)) {
