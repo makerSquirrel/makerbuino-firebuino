@@ -128,7 +128,7 @@ Image* survivor4FlipMetaArray[] = {&survivor4FlipBitmapMeta, &survivor4BitmapCla
 
 Image firebuinoMenu = Image(firebuinoMenuData);
 // Image ledLights = Image(ledLightsData);
-Image ledLights = Image(ledLightsDarkData);
+Image ledLights = Image(ledLightsv3Data);
 
 extern const uint8_t livesPositions[][3][2];
 extern const uint8_t ambulancePositions[][2];
@@ -140,6 +140,7 @@ extern const uint8_t survivorKOPositions[][3][2];
 
 void initGame() {
   gb.pickRandomSeed();
+  gb.lights.fill(BLACK);
 
   gameState = STATE_PLAYING;
   lives = 3;
